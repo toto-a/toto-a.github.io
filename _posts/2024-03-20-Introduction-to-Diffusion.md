@@ -1,9 +1,9 @@
 ---
 usemathjax : true
+title : Introduction to diffusion 
 ---
 
 
-## Introduction to diffusion 
 
 In my first blog post, I will try to explain all the concepts regarding diffusion, vae and ae. I will assume that you are a little familiar with ae and vae because I won't go into a lot of details about them.
 
