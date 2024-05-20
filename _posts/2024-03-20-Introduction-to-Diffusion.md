@@ -43,7 +43,7 @@ $$ p(x)= \displaystyle \int p(z)p(x,z) \, \mathrm{d}x $$
 
 However, we don't have access to the joint distribution $$p(x,z)$$, so we can not really compute this likelihood in our case.
 
-#### *Evidence Lower Bound*
+#### Evidence Lower Bound
 
 So,it seems that to find both the encoder and the decoder we will need to estimate them. 
 
@@ -53,7 +53,8 @@ the posterior distrubtion and the estimation of
 $$p(z|x)$$
 
 * $$ p_{\theta}(x|z)$$ 
-an estimate for $$p(x|z)$$
+an estimate for 
+$$p(x|z)$$
 
 We will assume that all distributions are gaussians. Why Gaussian ? it is because we want to impose 
 
