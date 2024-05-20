@@ -60,5 +60,5 @@ We will assume that all distributions are gaussians. Why Gaussian ? it is becaus
 
 As resumed by the figure below
 
-![_config.yml]({{ site.baseurl }}/images/vaeb.png)
+![_config.yml]({{ site.baseurl }}/images/vae_base.png)
 
