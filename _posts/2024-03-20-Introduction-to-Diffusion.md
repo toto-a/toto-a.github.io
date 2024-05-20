@@ -23,7 +23,7 @@ $$ \min\limits_{\theta,\phi} L$$
 
 The problem with autoencoders are that they are not a generative model, as it does not define a distribution over the dataset. The biggest problem lies with its latent representations as it is deterministic, for same input it will always generate same output. 
 
-It's like saying that each point in the latent space corresponds to a unique image.w
+It's like saying that each point in the latent space corresponds to a unique image.
 
 ### VAE (Variational autoencoders)
 
@@ -56,7 +56,7 @@ $$p(z|x)$$
 an estimate for 
 $$p(x|z)$$
 
-We will assume that all distributions are gaussians. Why Gaussian ? it is because we want to impose 
+We will assume that all distributions are gaussians. Why Gaussian ? it is because we want to impose some conditions to be able to derive e general structure from it. 
 
 As resumed by the figure below
 
