@@ -17,7 +17,7 @@ Given an input $$x\in \mathbb{R}^D$$, the encoder $$D_{\theta}$$ will be used to
 As the goal is just to rescontruct the input, we want to learn the mapping 
 $$\hat{x}=E_{\phi}(D_{\theta}(x)) \simeq x$$ 
 
-We want to find the ideal network that will minimize the loss $$ L=\|\hat{x} - x\|^2$$ 
+We want to find the ideal network that will minimize the loss $$ L=\|\hat{x} - x\|^2$$ . 
 We will need to find 
 $$ \min\limits_{\theta,\phi} L$$
 
