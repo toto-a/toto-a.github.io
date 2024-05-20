@@ -21,6 +21,38 @@ We want to find the ideal network that will minimize the loss $$ L=\|\hat{x} - x
 We will need to find 
 $$ \min\limits_{\theta,\phi} L$$
 
-The problem with autoencoders are that they are not a generative model, as it does not define a distribution. The biggest problem lies with its latent representations as it is deterministic, for same input it always generate same output.
+The problem with autoencoders are that they are not a generative model, as it does not define a distribution over the dataset. The biggest problem lies with its latent representations as it is deterministic, for same input it always generate same output. 
+
+It is like saying that for each point in the latent space, it is corresponding only to one image.
 
 ### VAE (Variational autoencoders)
+
+So, if we want to train a generative model, we will want maximize the likelihood of the observed data (think of the term of text-modelling and llm). But we also want the latent space to be general enough to be able to give us a strong representations of the obserseved data.
+
+Now let's consider some distributions : the one over the observation data, $$p(x)$$
+* $$p(z)$$ 
+the distribution of the latent variable and for the sake of simplicity let's suppose it is a unit-variance gaussian 
+$$p(z)=\mathcal{N}(0,\,1)$$
+
+* $$ p(x|z) $$ 
+the probability distribution of the decoder (posterior probability of getting x given z)
+
+With that done, we can define the likelihood of our distribution  : 
+
+$$ p(x)= \displaystyle \int p(z)p(x,z) \, \mathrm{d}x $$
+
+However, we don't have access to the joint distribution $$p(x,z)$$, so we can not really compute this likelihood in our case.
+
+#### Evidence Lower Bound
+
+So,it seems that to find both the encoder and the decoder we will need to estimate them. 
+
+Consider the following distribution: 
+* $$ q_{\phi}(z|x)$$ 
+the posterior distrubtion and the estimation of $$p(z|x)$$
+* $$ p_{\theta}(x|z)$$ 
+an estimate for $$p(x|z)$$
+
+As resumed by the figure below
+![_config.yml]({{ site.baseurl }}/images/vae_.png)
+
