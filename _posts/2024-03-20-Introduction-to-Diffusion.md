@@ -21,9 +21,9 @@ We want to find the ideal network that will minimize the loss $$ L=\|\hat{x} - x
 We will need to find 
 $$ \min\limits_{\theta,\phi} L$$
 
-The problem with autoencoders are that they are not a generative model, as it does not define a distribution over the dataset. The biggest problem lies with its latent representations as it is deterministic, for same input it always generate same output. 
+The problem with autoencoders are that they are not a generative model, as it does not define a distribution over the dataset. The biggest problem lies with its latent representations as it is deterministic, for same input it will always generate same output. 
 
-It is like saying that for each point in the latent space, it is corresponding only to one image.
+It's like saying that each point in the latent space corresponds to a unique image.w
 
 ### VAE (Variational autoencoders)
 
@@ -43,16 +43,21 @@ $$ p(x)= \displaystyle \int p(z)p(x,z) \, \mathrm{d}x $$
 
 However, we don't have access to the joint distribution $$p(x,z)$$, so we can not really compute this likelihood in our case.
 
-#### Evidence Lower Bound
+#### *Evidence Lower Bound*
 
 So,it seems that to find both the encoder and the decoder we will need to estimate them. 
 
 Consider the following distribution: 
 * $$ q_{\phi}(z|x)$$ 
-the posterior distrubtion and the estimation of $$p(z|x)$$
+the posterior distrubtion and the estimation of 
+$$p(z|x)$$
+
 * $$ p_{\theta}(x|z)$$ 
 an estimate for $$p(x|z)$$
 
+We will assume that all distributions are gaussians. Why Gaussian ? it is because we want to impose 
+
 As resumed by the figure below
-![_config.yml]({{ site.baseurl }}/images/vae_.png)
+
+![_config.yml]({{ site.baseurl }}/images/vaeb.png)
 
