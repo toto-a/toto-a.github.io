@@ -1,3 +1,6 @@
+---
+usemathjax : true
+---
 
 
 ## Introduction to diffusion 
