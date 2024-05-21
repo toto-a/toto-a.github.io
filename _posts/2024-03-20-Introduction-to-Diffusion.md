@@ -45,13 +45,13 @@ the probability distribution of the decoder (posterior probability of getting x 
 
 With that done, we can define the likelihood of our distribution  : 
 
-$$ p(x)= \displaystyle \int p(z)p(x,z) \, \mathrm{d}x $$
+$$ p(x)= \displaystyle \int p(x,z) \, \mathrm{d}x $$
 
 However, we don't have access to the joint distribution $$p(x,z)$$, so we can not really compute this likelihood in our case.
 
 #### Evidence Lower Bound
 
-So,it seems that to find both the encoder and the decoder we will need to estimate them. 
+So, it seems that to find both the encoder and the decoder we will need to estimate them. 
 
 Consider the following distribution: 
 * $$ q_{\phi}(z|x)$$ 
@@ -72,3 +72,14 @@ As resumed by the figure below
 {:refdef: style="text-align: center;"}
 <figcaption> Figure 2 : Principle of VAE</figcaption>
 {: refdef}
+
+Remember the likelihood of our distribution :
+$$p(x)= \displaystyle \int p(x,z) \, \mathrm{d}x $$ 
+
+It now becomes :
+
+$$p_{\theta}(x)= \displaystyle \int p_{\theta}(x,z) \, \mathrm{d}x $$
+
+Then after multiplying by $$q_{\phi}(z|x) $$ both the numerator and the denominator, and using Bayes rule to say : $$p_{\theta}(x,z)=p_{\theta}(x|z)*p_{\theta}(z)$$, the likelihood become :
+
+$$p_{\theta}(x)= \mathop{\mathbb{E_{q_{\phi}(z|x)}}}(\dfrac{p_{\theta}(x|z)*p_{\theta}(z)}{q_{\phi}(z|x)})$$ 
