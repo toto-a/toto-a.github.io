@@ -80,9 +80,27 @@ It now becomes :
 
 $$p_{\theta}(x)= \displaystyle \int p_{\theta}(x,z) \, \mathrm{d}x $$
 
-Then after multiplying by 
+Then using our proxy 
 $$q_{\phi}(z|x) $$ 
-both the numerator and the denominator, and using Bayes rule to say : $$p_{\theta}(x,z)=p_{\theta}(x|z)*p_{\theta}(z)$$, 
-the likelihood become :
+the log likelihood becomes :
 
-$$p_{\theta}(x)= \mathop{\mathbb{E_{q_{\phi}(z|x)}}}(\dfrac{p_{\theta}(x|z)*p_{\theta}(z)}{q_{\phi}(z|x)})$$ 
+$$log(p_{\theta}(x))= \mathop{\mathbb{E_{q_{\phi}(z|x)}}}[log({p_{\theta}(x)}]$$
+
+
+With Bayes rule, and mutiplying and dividing by both $$q_{\phi}(z|x)$$ : 
+we obtain : 
+
+$$log(p_{\theta}(x)) = \mathop{\mathbb{E_{q_{\phi}(z|x)}}}log(\dfrac{p_{\theta}(x,z)}{q_{\phi}(z|x)}\dfrac{q_{\phi}(z|x)}{p_{\theta}(z|x)} )$$
+
+$$log(p_{\theta}(x)) = \mathop{\mathbb{E_{q_{\phi}(z|x)}}}[log(\dfrac{p_{\theta}(x,z)}{q_{\phi}(z|x)}) + log(\dfrac{q_{\phi}(z|x)}{p_{\theta}(z|x)}) ]$$
+
+$$log(p_{\theta}(x)) = \mathop{\mathbb{E_{q_{\phi}(z|x)}}}[log(\dfrac{p_{\theta}(x,z)}{q_{\phi}(z|x)}) ] + KL(q_{\phi}(z|x)|| p_{\theta}(z)) $$
+
+As $$KL(q_{\phi}(z|x)|| p_{\theta}(z)) $$ 
+is always positive, we can say that :
+$$log(p_{\theta}(x)) \ge log(\dfrac{p_{\theta}(x,z)}{q_{\phi}(z|x)}) ]$$ 
+
+
+Let's denote $$ELBO =\log(\dfrac{p_{\theta}(x,z)}{q_{\phi}(z|x)}) $$ . 
+We have shown that ELBO is a valid lower bound. Now let's look more closely at what is this ELBO. 
+
