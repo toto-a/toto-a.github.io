@@ -80,6 +80,9 @@ It now becomes :
 
 $$p_{\theta}(x)= \displaystyle \int p_{\theta}(x,z) \, \mathrm{d}x $$
 
-Then after multiplying by $$q_{\phi}(z|x) $$ both the numerator and the denominator, and using Bayes rule to say : $$p_{\theta}(x,z)=p_{\theta}(x|z)*p_{\theta}(z)$$, the likelihood become :
+Then after multiplying by 
+$$q_{\phi}(z|x) $$ 
+both the numerator and the denominator, and using Bayes rule to say : $$p_{\theta}(x,z)=p_{\theta}(x|z)*p_{\theta}(z)$$, 
+the likelihood become :
 
 $$p_{\theta}(x)= \mathop{\mathbb{E_{q_{\phi}(z|x)}}}(\dfrac{p_{\theta}(x|z)*p_{\theta}(z)}{q_{\phi}(z|x)})$$ 
