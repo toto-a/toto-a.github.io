@@ -12,7 +12,10 @@ In my first blog post, I will cover the key concepts of diffusion, VAE, and AE. 
 
 Given an input $$x\in \mathbb{R}^D$$, the encoder $$D_{\theta}$$ will be used to generate an a latent variable z, to be passed to the decoder $$E_{\phi}$$, as shown in the image below  :
 
+
+{:refdef: style="text-align: center;"}
 ![_config.yml]({{ site.baseurl }}/images/ae.png)
+{: refdef}
 
 As the goal is just to rescontruct the input, we want to learn the mapping 
 $$\hat{x}=E_{\phi}(D_{\theta}(x)) \simeq x$$ 
@@ -56,9 +59,13 @@ $$p(z|x)$$
 an estimate for 
 $$p(x|z)$$
 
-We will assume that all distributions are gaussians. Why Gaussian ? it is because we want to impose some conditions to be able to derive e general structure from it. 
+We will assume that all distributions are gaussians. Why Gaussian ? it is because we want to impose some conditions to be able to derive some general structure from it. 
 
 As resumed by the figure below
 
+{:refdef: style="text-align: center;"}
 ![_config.yml]({{ site.baseurl }}/images/vae_base.png)
-
+{: refdef}
+{:refdef: style="text-align: center;"}
+<figcaption> Figure 2 : Principle of VAE</figcaption>
+{: refdef}
