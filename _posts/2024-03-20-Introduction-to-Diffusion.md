@@ -16,6 +16,9 @@ Given an input $$x\in \mathbb{R}^D$$, the encoder $$D_{\theta}$$ will be used to
 {:refdef: style="text-align: center;"}
 ![_config.yml]({{ site.baseurl }}/images/ae.png)
 {: refdef}
+{:refdef: style="text-align: center;"}
+<figcaption> Figure 1 : Principle of an Auto-Encoders</figcaption>
+{: refdef}
 
 As the goal is just to rescontruct the input, we want to learn the mapping 
 $$\hat{x}=E_{\phi}(D_{\theta}(x)) \simeq x$$ 
