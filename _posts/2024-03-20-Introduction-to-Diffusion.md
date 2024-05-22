@@ -82,25 +82,16 @@ $$p_{\theta}(x)= \displaystyle \int p_{\theta}(x,z) \, \mathrm{d}x $$
 
 Then using our proxy 
 $$q_{\phi}(z|x) $$ 
-the log likelihood becomes :
+the likelihood becomes :
 
-$$log(p_{\theta}(x))= \mathop{\mathbb{E_{q_{\phi}(z|x)}}}[log({p_{\theta}(x)}]$$
-
-
-With Bayes rule, and mutiplying and dividing by both $$q_{\phi}(z|x)$$ : 
-we obtain : 
-
-$$log(p_{\theta}(x)) = \mathop{\mathbb{E_{q_{\phi}(z|x)}}}log(\dfrac{p_{\theta}(x,z)}{q_{\phi}(z|x)}\dfrac{q_{\phi}(z|x)}{p_{\theta}(z|x)} )$$
-
-$$log(p_{\theta}(x)) = \mathop{\mathbb{E_{q_{\phi}(z|x)}}}[log(\dfrac{p_{\theta}(x,z)}{q_{\phi}(z|x)}) + log(\dfrac{q_{\phi}(z|x)}{p_{\theta}(z|x)}) ]$$
-
-$$log(p_{\theta}(x)) = \mathop{\mathbb{E_{q_{\phi}(z|x)}}}[log(\dfrac{p_{\theta}(x,z)}{q_{\phi}(z|x)}) ] + KL(q_{\phi}(z|x)|| p_{\theta}(z)) $$
-
-As $$KL(q_{\phi}(z|x)|| p_{\theta}(z)) $$ 
-is always positive, we can say that :
-$$log(p_{\theta}(x)) \ge log(\dfrac{p_{\theta}(x,z)}{q_{\phi}(z|x)}) ]$$ 
+$$p_{\theta}(x)= \mathop{\mathbb{E_{q_{\phi}(z|x)}}}[\dfrac{p_{\theta}(x,z)}{q_{\phi}(z|x)}]$$
 
 
-Let's denote $$ELBO =\log(\dfrac{p_{\theta}(x,z)}{q_{\phi}(z|x)}) $$ . 
+With Jensen inequality, we obtain : 
+
+$$log(p_{\theta}(x)) \ge \mathop{\mathbb{E_{q_{\phi}(z|x)}}}[log(\dfrac{p_{\theta}(x,z)}{q_{\phi}(z|x)})]$$
+
+
+Let's denote $$\boxed{ELBO =\log(\dfrac{p_{\theta}(x,z)}{q_{\phi}(z|x)})}$$ 
 We have shown that ELBO is a valid lower bound. Now let's look more closely at what is this ELBO. 
 
