@@ -70,8 +70,6 @@ Now for the denominator, although in lower dimension we can compute each term. H
 > The integral becomes : $$ p(x_i)= \displaystyle \sum_{z_{j}} \int p(z_{j})\prod_{i=1}^{n} p(x_i|z_j) \, \mathrm{d}z_j $$
 
 
-However, we don't have access to the joint distribution $$p(x,z)$$, so we can not really compute this likelihood in our case.
-
 ### *Evidence Lower Bound*
 
 So, it seems that to find both the encoder and the decoder we will need to approximate them. 
