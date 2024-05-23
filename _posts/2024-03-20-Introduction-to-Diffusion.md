@@ -1,6 +1,8 @@
 ---
 usemathjax : true
 title : Introduction to diffusion 
+header-includes:
+   - \usepackage{annotate-equations}
 ---
 
 
@@ -8,7 +10,7 @@ title : Introduction to diffusion
 In my first blog post, I will cover the key concepts of diffusion, VAE, and AE. I'll assume you have some basic knowledge of AE and VAE, so I won't go into too much details into those topics.
 
 
-### What are AE (Auto Encoders) 
+## What are AE (Auto Encoders) 
 
 Given an input $$x\in \mathbb{R}^D$$, the encoder $$D_{\theta}$$ will be used to generate an a latent variable z, to be passed to the decoder $$E_{\phi}$$, as shown in the image below  :
 
@@ -25,37 +27,58 @@ $$\hat{x}=E_{\phi}(D_{\theta}(x)) \simeq x$$
 
 We want to find the ideal network that will minimize the loss $$ L=\|\hat{x} - x\|^2$$ . 
 We will need to find 
-$$ \min\limits_{\theta,\phi} L$$
+$$ \arg \min\limits_{\theta,\phi} L$$
 
 The problem with autoencoders are that they are not a generative model, as it does not define a distribution over the dataset. The biggest problem lies with its latent representations as it is deterministic, for same input it will always generate same output. 
 
 It's like saying that each point in the latent space corresponds to a unique image.
 
-### VAE (Variational autoencoders)
+## VAE (Variational autoencoders)
 
 So, if we want to train a generative model, we will want maximize the likelihood of the observed data (think of the term of text-modelling and llm). But we also want the latent space to be general enough to be able to give us a strong representations of the obserseved data.
 
-Now let's consider some distributions : the one over the observation data, $$p(x)$$
+Now let's consider some distributions : the one over the observation data, our prior :
+
+* $$p(x)$$
+
 * $$p(z)$$ 
 the distribution of the latent variable and for the sake of simplicity let's suppose it is a unit-variance gaussian 
 $$p(z)=\mathcal{N}(0,\,1)$$
 
+* $$p(z|x)$$ 
+that describes the distribution of the encoded variable given the decoded one 
+
 * $$ p(x|z) $$ 
-the probability distribution of the decoder (posterior probability of getting x given z)
+that describes the distribution of the decoded variable given the encoded one and our likelihood.
 
-With that done, we can define the likelihood of our distribution  : 
+With that done, let's consider  : 
 
-$$ p(x)= \displaystyle \int p(x,z) \, \mathrm{d}x $$
+$$ p(x)= \displaystyle \int p(x|z)p(z) \, \mathrm{d}z $$
+And by Bayes theorem we have :
+
+$$ p(z|x)= \dfrac{p(x|z)p(z)}{\displaystyle \int p(x|z)p(z) \, \mathrm{d}z }$$
+
+In theory, as we know $$p(z)$$ 
+and $$p(x|z)$$ 
+(a gaussian with a deterministic mean and variance),so we know the numerator. 
+
+Now for the denominator, although in lower dimension we can compute each term. However in higher dimension, it becomes quickly intractable
+> Consider for example the case where $$x =x_{1:n} $$ 
+>and $$z=z_{1:m}$$ 
+>with $$n,m \in \mathbb{N^{*}}$$
+>and $$ m<n $$
+> The integral becomes : $$ p(x_i)= \displaystyle \sum_{z_{j}} \int p(z_{j})\prod_{i=1}^{n} p(x_i|z_j) \, \mathrm{d}z_j $$
+
 
 However, we don't have access to the joint distribution $$p(x,z)$$, so we can not really compute this likelihood in our case.
 
-#### Evidence Lower Bound
+### *Evidence Lower Bound*
 
-So, it seems that to find both the encoder and the decoder we will need to estimate them. 
+So, it seems that to find both the encoder and the decoder we will need to approximate them. 
 
 Consider the following distribution: 
 * $$ q_{\phi}(z|x)$$ 
-the posterior distrubtion and the estimation of 
+the posterior distrubtion which approximate
 $$p(z|x)$$
 
 * $$ p_{\theta}(x|z)$$ 
@@ -73,7 +96,7 @@ As resumed by the figure below
 <figcaption> Figure 2 : Principle of VAE</figcaption>
 {: refdef}
 
-Remember the likelihood of our distribution :
+Remember our integral :
 $$p(x)= \displaystyle \int p(x,z) \, \mathrm{d}x $$ 
 
 It now becomes :
@@ -82,16 +105,28 @@ $$p_{\theta}(x)= \displaystyle \int p_{\theta}(x,z) \, \mathrm{d}x $$
 
 Then using our proxy 
 $$q_{\phi}(z|x) $$ 
-the likelihood becomes :
+we have that : 
 
-$$p_{\theta}(x)= \mathop{\mathbb{E_{q_{\phi}(z|x)}}}[\dfrac{p_{\theta}(x,z)}{q_{\phi}(z|x)}]$$
+$$p_{\theta}(x)= \mathop{\mathbb{E_{q_{\phi}(z|x)}}}\Big[ \dfrac{p_{\theta}(x,z)}{q_{\phi}(z|x)}\Big]$$
 
 
 With Jensen inequality, we obtain : 
 
-$$log(p_{\theta}(x)) \ge \mathop{\mathbb{E_{q_{\phi}(z|x)}}}[log(\dfrac{p_{\theta}(x,z)}{q_{\phi}(z|x)})]$$
+$$log(p_{\theta}(x)) \ge \mathop{\mathbb{E_{q_{\phi}(z|x)}}}\Big[\log  \dfrac{p_{\theta}(x,z)}{q_{\phi}(z|x)}\Big]$$
 
 
-Let's denote $$\boxed{ELBO =\log(\dfrac{p_{\theta}(x,z)}{q_{\phi}(z|x)})}$$ 
-We have shown that ELBO is a valid lower bound. Now let's look more closely at what is this ELBO. 
+Let's denote $$\boxed{ELBO(x) =\mathbb{E_{q_{\phi}(z|x)}} \Big[ \log \dfrac{p_{\theta}(x,z)}{q_{\phi}(z|x)} \Big]} $$ 
+We have shown that ELBO is a valid lower bound for our prior distribution. Now let's look more closely at what is this ELBO. 
+
+By Bayes theorem, we can developp our ELBO to look like 
+$$ELBO(x)=\mathbb{E_{q_{\phi}(z|x)}} \Big[ \log \dfrac{p_{\theta}(x,z)}{q_{\phi}(z|x)} \Big]$$
+$$ELBO(x)=\mathbb{E_{q_{\phi}(z|x)}}\Big[ \log p_{\theta}(x|z) \Big]+
+ \mathbb{E_{q_{\phi}(z|x)}}\Big[\log\dfrac{p(z)}{q_{\phi}(z|x)}\Big]$$
+
+Finally :
+$$ \boxed {ELBO(x)=\mathbb{E_{q_{\phi}(z|x)}}\Big[\log p_{\theta}(x|z) \Big] - \mathbb{D}_{KL} \Big({q_{\phi}(z|x)} \ || \ p_{\theta}(z)\Big) } $$
+
+
+
+
 
