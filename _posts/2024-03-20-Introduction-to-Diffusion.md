@@ -62,12 +62,12 @@ In theory, as we know $$p(z)$$
 and $$p(x|z)$$ 
 (a gaussian with a deterministic mean and variance),so we know the numerator. 
 
-Now for the denominator, although in lower dimension we can compute each term. However in higher dimension, it becomes quickly intractable
+Now for the denominator, although in lower dimension we can compute each term. However in higher dimension, it becomes quickly intractable.
 > Consider for example the case where $$x =x_{1:n} $$ 
 >and $$z=z_{1:m}$$ 
 >with $$n,m \in \mathbb{N^{*}}$$
 >and $$ m<n $$
-> The integral becomes : $$ p(x_i)= \displaystyle \sum_{z_{j}} \int p(z_{j})\prod_{i=1}^{n} p(x_i|z_j) \, \mathrm{d}z_j $$
+> The integral becomes : $$ p(x_i)= \displaystyle \int \sum_{z_{j}} p(z_{j})\prod_{i=1}^{n} p(x_i|z_j) \, \mathrm{d}z_j $$
 
 
 ### *Evidence Lower Bound*
