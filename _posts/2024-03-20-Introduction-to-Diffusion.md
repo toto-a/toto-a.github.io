@@ -51,10 +51,12 @@ that describes the distribution of the encoded variable given the decoded one
 * $$ p(x|z) $$ 
 that describes the distribution of the decoded variable given the encoded one and our likelihood.
 
-With that done, let's consider  : 
+With that done, let's consider this integral : 
 
-$$ p(x)= \displaystyle \int p(x|z)p(z) \, \mathrm{d}z $$
-And by Bayes theorem we have :
+$$ p(x)= \displaystyle \int p(x|z)p(z) \, \mathrm{d}z $$ 
+Also called the _marginal likelihood_ or the _model evidence_. 
+
+By Bayes theorem we have that :
 
 $$ p(z|x)= \dfrac{p(x|z)p(z)}{\displaystyle \int p(x|z)p(z) \, \mathrm{d}z }$$
 
@@ -113,16 +115,46 @@ With Jensen inequality, we obtain :
 $$log(p_{\theta}(x)) \ge \mathop{\mathbb{E_{q_{\phi}(z|x)}}}\Big[\log  \dfrac{p_{\theta}(x,z)}{q_{\phi}(z|x)}\Big]$$
 
 
-Let's denote $$\boxed{ELBO(x) =\mathbb{E_{q_{\phi}(z|x)}} \Big[ \log \dfrac{p_{\theta}(x,z)}{q_{\phi}(z|x)} \Big]} $$ 
-We have shown that ELBO is a valid lower bound for our prior distribution. Now let's look more closely at what is this ELBO. 
+Let's denote $$\boxed{ELBO(x) =\mathbb{E_{q_{\phi}(z|x)}} \Big[ \log \dfrac{p_{\theta}(x,z)}{q_{\phi}(z|x)} \Big]} \ (1) $$ 
+We have shown that ELBO is a valid lower bound on the log likelihood  of the data. Now let's look more closely at what is this ELBO. 
 
-By Bayes theorem, we can developp our ELBO to look like 
+By Bayes theorem, we can develop our ELBO to look like : 
 $$ELBO(x)=\mathbb{E_{q_{\phi}(z|x)}} \Big[ \log \dfrac{p_{\theta}(x,z)}{q_{\phi}(z|x)} \Big]$$
 $$ELBO(x)=\mathbb{E_{q_{\phi}(z|x)}}\Big[ \log p_{\theta}(x|z) \Big]+
  \mathbb{E_{q_{\phi}(z|x)}}\Big[\log\dfrac{p(z)}{q_{\phi}(z|x)}\Big]$$
 
 Finally :
-$$ \boxed {ELBO(x)=\mathbb{E_{q_{\phi}(z|x)}}\Big[\log p_{\theta}(x|z) \Big] - \mathbb{D}_{KL} \Big({q_{\phi}(z|x)} \ || \ p_{\theta}(z)\Big) } $$
+$$ \boxed {ELBO(x)=\mathbb{E_{q_{\phi}(z|x)}}\Big[\log p_{\theta}(x|z) \Big] - \mathbb{D}_{KL} \Big({q_{\phi}(z|x)} \ || \ p_{\theta}(z)\Big) } \ (2) $$ 
+
+* The first term 
+($$ \mathbb{E_{q_{\phi}(z|x)}} \Big[\log p_{\theta}(x|z) \Big] $$) 
+represent the likelihood and the quality of our decoder. Note here, that the expectation is taken with respect to the sample z, which is sampled from $$ q_{\phi} (z|x) $$ 
+because we want a meaningful latent vector.
+
+* The second term 
+($$ \mathbb{D}_{KL} \Big({q_{\phi}(z|x)} \ || \ p_{\theta}(z)\Big) $$)
+the quality of our encoder and act as a regularizer, such that the encoded latent vector will follow our choice of a normal distribution. 
+
+### *Reparameterization Trick*
+
+We found a valid lower bound for our distribution which is our $$ELBO$$ which is a function of $$\theta$$ and $$\phi$$. 
+
+So we can wirte that for a given dataset, the $$ELBO$$ objective can be expressed as  :
+
+$$ \mathcal{L}_{\theta,\phi} \big(x\big) = \sum_{x_i} ELBO(x_i) $$
+
+Now let's look at is gradient  :
+
+* First with respect to $$\theta$$ :
+From $$ (1) $$, we can see that since $$q_{\phi}(z|x) $$ does not depend on theta, the gradient of the objective is : 
+   $$\nabla_{\theta} \mathcal{L}_{\theta,\phi} \big(x\big) \simeq \nabla_{\theta} \ log \ p_{\theta} (x,z) $$
+
+* With respect to $$\phi$$ :  
+This is where it gets tricky, because the $$ ELBO$$ expectation is taken with respect to  $${q_{\phi}(z|x)}$$ which is a function of $$\phi$$, we cannot really compute its gradient. 
+
+
+
+
 
 
 
