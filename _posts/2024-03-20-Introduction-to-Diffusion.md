@@ -133,7 +133,7 @@ because we want a meaningful latent vector.
 
 * The second term 
 ($$ \mathbb{D}_{KL} \Big({q_{\phi}(z|x)} \ || \ p_{\theta}(z)\Big) $$)
-the quality of our encoder and act as a regularizer, such that the encoded latent vector will follow our choice of a normal distribution. 
+the quality of our encoder and act as a regularizer, such that the encoded latent vector will follow our choice of a normal distribution with zero mean and unit variance. 
 
 ### *Reparameterization Trick*
 
@@ -150,11 +150,21 @@ From $$ (1) $$, we can see that since $$q_{\phi}(z|x) $$ does not depend on thet
    $$\nabla_{\theta} \mathcal{L}_{\theta,\phi} \big(x\big) \simeq \nabla_{\theta} \ log \ p_{\theta} (x,z) $$
 
 * With respect to $$\phi$$ :  
-This is where it gets tricky, because the $$ ELBO$$ expectation is taken with respect to  $${q_{\phi}(z|x)}$$ which is a function of $$\phi$$, we cannot really compute its gradient. 
+This is where it gets tricky, because the $$ ELBO$$ expectation is taken with respect to  $${q_{\phi}(z|x)}$$ which is a function of $$\phi$$, so we cannot really compute its gradient. 
 
+This is where the reparametrization trick comes in handy. Intead of sampling $$z$$ from $$z \sim q_{\phi} (z|x)$$ where $$q_{\phi} (z|x)= \mathcal{N} (z|\mu(x) , \sigma^2(x)I) $$ is a Gaussian with mean $$\mu$$ and covariance matrix $$\sigma^2I$$ (we asssume equal variance).
 
+We express $$z \sim q_{\phi} (z|x)$$ as some differentiable tranformation of another random varaible $$\epsilon$$, let $$z=g(\epsilon, x, \phi) $$ and draw $$\epsilon \sim p(\epsilon) $$. In another term $$z=\mu(x) + \sigma^{\frac{1}{2}}(x)\epsilon$$ where $$\epsilon \sim \mathcal{N}(0,I)$$
 
+The idea is shown in Figure 2.1.
 
+{:refdef: style="text-align: center;"}
+![_config.yml]({{ site.baseurl }}/images/vae_repara.png)
+{: refdef}
+{:refdef: style="text-align: center;"}
+<figcaption> Figure 2.1 : Illustration of reparametrization trick (Source :Diederik P. Kingma and Max Welling (2019), “An Introduction to
+Variational Autoencoders”, Foundations and Trends R© in Machine Learning) /figcaption>
+{: refdef}
 
 
 
