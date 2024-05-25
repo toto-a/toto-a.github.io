@@ -156,7 +156,7 @@ This is where the reparametrization trick comes in handy. Intead of sampling $$z
 
 We express $$z \sim q_{\phi} (z|x)$$ as some differentiable tranformation of another random varaible $$\epsilon$$, let $$z=g(\epsilon, x, \phi) $$ and draw $$\epsilon \sim p(\epsilon) $$. In another term $$z=\mu(x) + \sigma^{\frac{1}{2}}(x)\epsilon$$ where $$\epsilon \sim \mathcal{N}(0,I)$$
 
-The idea is shown in Figure 2.1.
+The idea is shown below in Figure 2.1.
 
 {:refdef: style="text-align: center;"}
 ![_config.yml]({{ site.baseurl }}/images/vae_repara.png)
