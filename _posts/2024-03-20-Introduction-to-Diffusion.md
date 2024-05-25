@@ -3,6 +3,8 @@ usemathjax : true
 title : Introduction to diffusion 
 header-includes:
    - \usepackage{annotate-equations}
+
+figureTemplate: '*$$figureTitle$$ $$i$$*$$titleDelim$$ $$t$$'
 ---
 
 
@@ -157,23 +159,34 @@ from
 $$z \sim q_{\phi} (z|x)$$ 
 where 
 $$q_{\phi} (z|x)= \mathcal{N} (z|\mu(x) , \sigma^2(x)I) $$ 
-is a Gaussian with mean $
-$\mu$$ 
+is a Gaussian with mean
+$$\mu$$ 
 and covariance matrix 
 $$\sigma^2I$$ 
 (we asssume equal variance).
 
-We express $$z \sim q_{\phi} (z|x)$$ as some differentiable tranformation of another random varaible $$\epsilon$$, let $$z=g(\epsilon, x, \phi) $$ and draw $$\epsilon \sim p(\epsilon) $$. In another term $$z=\mu(x) + \sigma^{\frac{1}{2}}(x)\epsilon$$ where $$\epsilon \sim \mathcal{N}(0,I)$$
+We express 
+$$z \sim q_{\phi} (z|x)$$ 
+as some differentiable tranformation of another random varaible 
+$$\epsilon$$
+, let 
+$$z=g(\epsilon, x, \phi) $$
+and draw 
+$$\epsilon \sim p(\epsilon) $$
+.In another term 
+$$z=\mu(x) + \sigma^{\frac{1}{2}}(x)\epsilon$$ 
+where 
+$$\epsilon \sim \mathcal{N}(0,I)$$
 
 The idea is shown below in Figure 2.1.
 
 {:refdef: style="text-align: center;"}
 ![_config.yml]({{ site.baseurl }}/images/vae_repara.png)
 {: refdef}
+
 {:refdef: style="text-align: center;"}
-<figcaption> Figure 2.1 : Illustration of reparametrization trick (Source :Diederik P. Kingma and Max Welling (2019), “An Introduction to
-Variational Autoencoders”, Foundations and Trends R© in Machine Learning) /figcaption>
-{: refdef}
+<figcaption> Figure 2.1: Illustration of reparametrization trick (Source : Diederik P. Kingma and Max Welling (2019), “An Introduction to
+Variational Autoencoders”, Foundations and Trends R© in Machine Learning)<figcaption>
 
 
 
