@@ -152,7 +152,16 @@ From $$ (1) $$, we can see that since $$q_{\phi}(z|x) $$ does not depend on thet
 * With respect to $$\phi$$ :  
 This is where it gets tricky, because the $$ ELBO$$ expectation is taken with respect to  $${q_{\phi}(z|x)}$$ which is a function of $$\phi$$, so we cannot really compute its gradient. 
 
-This is where the reparametrization trick comes in handy. Intead of sampling $$z$$ from $$z \sim q_{\phi} (z|x)$$ where $$q_{\phi} (z|x)= \mathcal{N} (z|\mu(x) , \sigma^2(x)I) $$ is a Gaussian with mean $$\mu$$ and covariance matrix $$\sigma^2I$$ (we asssume equal variance).
+This is where the reparametrization trick comes in handy. Intead of sampling $$z$$
+from 
+$$z \sim q_{\phi} (z|x)$$ 
+where 
+$$q_{\phi} (z|x)= \mathcal{N} (z|\mu(x) , \sigma^2(x)I) $$ 
+is a Gaussian with mean $
+$\mu$$ 
+and covariance matrix 
+$$\sigma^2I$$ 
+(we asssume equal variance).
 
 We express $$z \sim q_{\phi} (z|x)$$ as some differentiable tranformation of another random varaible $$\epsilon$$, let $$z=g(\epsilon, x, \phi) $$ and draw $$\epsilon \sim p(\epsilon) $$. In another term $$z=\mu(x) + \sigma^{\frac{1}{2}}(x)\epsilon$$ where $$\epsilon \sim \mathcal{N}(0,I)$$
 
