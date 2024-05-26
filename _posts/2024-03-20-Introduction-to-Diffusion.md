@@ -118,6 +118,7 @@ $$log(p_{\theta}(x)) \ge \mathop{\mathbb{E_{q_{\phi}(z|x)}}}\Big[\log  \dfrac{p_
 
 
 Let's denote $$\boxed{ELBO(x) =\mathbb{E_{q_{\phi}(z|x)}} \Big[ \log \dfrac{p_{\theta}(x,z)}{q_{\phi}(z|x)} \Big]} \ (1) $$ 
+
 We have shown that ELBO is a valid lower bound on the log likelihood  of the data. Now let's look more closely at what is this ELBO. 
 
 By Bayes theorem, we can develop our ELBO to look like : 
@@ -141,7 +142,7 @@ the quality of our encoder and act as a regularizer, such that the encoded laten
 
 We found a valid lower bound for our distribution which is our $$ELBO$$ which is a function of $$\theta$$ and $$\phi$$. 
 
-So we can wirte that for a given dataset, the $$ELBO$$ objective can be expressed as  :
+So we can wirte that for a given dataset, the $$ELBO$$ objective can be expressed as :
 
 $$ \mathcal{L}_{\theta,\phi} \big(x\big) = \sum_{x_i} ELBO(x_i) $$
 
@@ -190,7 +191,7 @@ Variational Autoencoders”, Foundations and Trends R© in Machine Learning)</fi
 {: refdef}
 
 ### *Training*  
-After everything said, the loss function in our case is simply (with Monte-Carlo simulation) :
+After everything said, the loss function in our case is simply (with Monte-Carlo simulation):
 
 $$\mathcal{L}_{\theta,\phi} \simeq \frac{1}{D} \sum_{i=1}^{D} log \ p_{\theta}(x^{i}| z^{i}) + \mathbb{D}_{KL}\big(q_{\phi}(z|x^{i})\ ||p_{\theta}(z)\big)   $$
 
