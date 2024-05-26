@@ -117,7 +117,8 @@ With Jensen inequality, we obtain :
 $$log(p_{\theta}(x)) \ge \mathop{\mathbb{E_{q_{\phi}(z|x)}}}\Big[\log  \dfrac{p_{\theta}(x,z)}{q_{\phi}(z|x)}\Big]$$
 
 
-Let's denote $$\boxed{ELBO(x) =\mathbb{E_{q_{\phi}(z|x)}} \Big[ \log \dfrac{p_{\theta}(x,z)}{q_{\phi}(z|x)} \Big]} \ (1) $$ 
+Let's denote 
+$$\boxed{ELBO(x) =\mathbb{E_{q_{\phi}(z|x)}} \Big[ \log \dfrac{p_{\theta}(x,z)}{q_{\phi}(z|x)} \Big]} \ (1) $$ 
 
 We have shown that ELBO is a valid lower bound on the log likelihood  of the data. Now let's look more closely at what is this ELBO. 
 
