@@ -186,18 +186,17 @@ The idea is shown below in Figure 2.1.
 
 {:refdef: style="text-align: center;"}
 <figcaption> Figure 2.1: Illustration of reparametrization trick (Source : Diederik P. Kingma and Max Welling (2019), “An Introduction to
-Variational Autoencoders”, Foundations and Trends R© in Machine Learning)<figcaption>
+Variational Autoencoders”, Foundations and Trends R© in Machine Learning)</figcaption>
+{: refdef}
 
-### *Training* 
-
+### *Training*  
 After everything said, the loss function in our case is simply (with Monte-Carlo simulation) :
 $$\mathcal{L}_{\theta,\phi} \simeq \frac{1}{D} \sum_{i=1}^{D} log \ p_{\theta}(x^{i}| z^{i}) + \mathbb{D}_{KL}\big(q_{\phi}(z|x^{i})\ ||p_{\theta}(z)\big)   $$
 
-So, we are searching for the $$\theta$$ and $$\phi$$ which will maximize  
-$$  \mathcal{L}_{\theta,\phi} $$ 
+So, we are searching for the $$\theta$$ and $$\phi$$ which will maximize $$  \mathcal{L}_{\theta,\phi} $$ 
 . In another word, we want to find  :
 
-$$ \boxed {\theta^{*}, \phi^{*} = \argmax_{\theta, \phi} \mathcal{L}_{\theta, \phi}} $$
+$$ \boxed {\theta^{*}, \phi^{*} = \arg \max_{\theta, \phi} \mathcal{L}_{\theta, \phi}} $$
 
 
 >So to resume what we saw : 
