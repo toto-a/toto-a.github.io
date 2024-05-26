@@ -152,7 +152,7 @@ From $$ (1) $$, we can see that since $$q_{\phi}(z|x) $$ does not depend on thet
    $$\nabla_{\theta} \mathcal{L}_{\theta,\phi} \big(x\big) \simeq \nabla_{\theta} \ log \ p_{\theta} (x,z) $$
 
 * With respect to $$\phi$$ :  
-This is where it gets tricky, because the $$ ELBO$$ expectation is taken with respect to  $${q_{\phi}(z|x)}$$ which is a function of $$\phi$$, so we cannot really compute its gradient. 
+This is where it gets tricky, because the $$ ELBO$$ expectation is taken with respect to  $${q_{\phi}(z|x)}$$ which is a function of $$\phi$$, so we cannot really compute its gradient as easily as for $$ {\theta} $$ . 
 
 This is where the reparametrization trick comes in handy. Intead of sampling $$z$$
 from 
@@ -187,6 +187,29 @@ The idea is shown below in Figure 2.1.
 {:refdef: style="text-align: center;"}
 <figcaption> Figure 2.1: Illustration of reparametrization trick (Source : Diederik P. Kingma and Max Welling (2019), “An Introduction to
 Variational Autoencoders”, Foundations and Trends R© in Machine Learning)<figcaption>
+
+### *Training* 
+
+After everything said, the loss function in our case is simply (with Monte-Carlo simulation) :
+$$\mathcal{L}_{\theta,\phi} \simeq \frac{1}{D} \sum_{i=1}^{D} log \ p_{\theta}(x^{i}| z^{i}) + \mathbb{D}_{KL}\big(q_{\phi}(z|x^{i})\ ||p_{\theta}(z)\big)   $$
+
+So, we are searching for the $$ {\theta} and {\phi}$$ which will maximize  $$  \mathcal{L}_{\theta,\phi} $$ . In another word, we want to find  :
+
+$$ \boxed {{\theta}^{*}, {\phi}^{*} = \argmax_{\theta, \phi} \mathcal{L}_{\theta, \phi}} $$
+
+
+>So to resume what we saw : 
+>- AE are very at obtaining a compressed representation of the input data. But its features space is not continous, which cannot provide a rich semantic correlation of the input space 
+>
+> - VAE are better than AE, in this point with latent space regularization. However, VAE suffers from the case of posterior collapse, where the posterior of the latent variable is equal to the prior. 
+
+## Diffusion Models 
+
+
+
+
+
+
 
 
 
