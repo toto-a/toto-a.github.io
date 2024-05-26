@@ -191,6 +191,7 @@ Variational Autoencoders”, Foundations and Trends R© in Machine Learning)</fi
 
 ### *Training*  
 After everything said, the loss function in our case is simply (with Monte-Carlo simulation) :
+
 $$\mathcal{L}_{\theta,\phi} \simeq \frac{1}{D} \sum_{i=1}^{D} log \ p_{\theta}(x^{i}| z^{i}) + \mathbb{D}_{KL}\big(q_{\phi}(z|x^{i})\ ||p_{\theta}(z)\big)   $$
 
 So, we are searching for the $$\theta$$ and $$\phi$$ which will maximize $$  \mathcal{L}_{\theta,\phi} $$ 
