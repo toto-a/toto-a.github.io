@@ -39,7 +39,12 @@ It's like saying that each point in the latent space corresponds to a unique ima
 
 So, if we want to train a generative model, we will want maximize the likelihood of the observed data. But we also want the latent space to be general enough to be able to give us a strong representations of the observed data.
 
->In general, with generative modeling, we want to learn a model to maximize the likelihood of $$p(x)$$ of all observed x, but because it is unknown in general, we consider a latent variable $$z$$ that we will use to recover our likelihood via a posterior $$p(z|x)$$
+>In general, with generative modeling, we want to learn a model to maximize the likelihood of 
+>$$p(x)$$ 
+>of all observed 
+>$$x$$
+>, but because it is unknown in general, we consider a latent variable $$z$$ that we will use to recover our likelihood via a posterior 
+>$$p(z|x)$$
 
 Now let's consider some distributions : the one over the observation data, our prior :
 
@@ -149,7 +154,7 @@ $$\log \ p_{\theta}(x) \geq ELBO $$
 
 So the difference between $$ELBO$$ and our evidence is strictly non negative, thus the $$ELBO$$ can never exceed our evidence and is a valid lower bound.
 
-Now let's look more closely at what is this ELBO and 
+Now let's look more closely at what is this ELBO.  
 
 By Bayes theorem, we can develop our ELBO to look like : 
 $$ELBO(x)=\mathbb{E_{q_{\phi}(z|x)}} \Big[ \log \dfrac{p_{\theta}(x,z)}{q_{\phi}(z|x)} \Big]$$
