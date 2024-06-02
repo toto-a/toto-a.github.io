@@ -37,7 +37,9 @@ It's like saying that each point in the latent space corresponds to a unique ima
 
 ## VAE (Variational autoencoders)
 
-So, if we want to train a generative model, we will want maximize the likelihood of the observed data (think of the term of text-modelling and llm). But we also want the latent space to be general enough to be able to give us a strong representations of the obserseved data.
+So, if we want to train a generative model, we will want maximize the likelihood of the observed data. But we also want the latent space to be general enough to be able to give us a strong representations of the observed data.
+
+>In general, with generative modeling, we want to learn a model to maximize the likelihood of $$p(x)$$ of all observed x, but because it is unknown in general, we consider a latent variable $$z$$ that we will use to recover our likelihood via a posterior $$p(z|x)$$
 
 Now let's consider some distributions : the one over the observation data, our prior :
 
@@ -51,7 +53,7 @@ $$p(z)=\mathcal{N}(0,\,1)$$
 that describes the distribution of the encoded variable given the decoded one 
 
 * $$ p(x|z) $$ 
-that describes the distribution of the decoded variable given the encoded one and our likelihood.
+that describes the distribution of the decoded variable given the encoded one .
 
 With that done, let's consider this integral : 
 
@@ -114,13 +116,40 @@ $$p_{\theta}(x)= \mathop{\mathbb{E_{q_{\phi}(z|x)}}}\Big[ \dfrac{p_{\theta}(x,z)
 
 With Jensen inequality, we obtain : 
 
-$$log(p_{\theta}(x)) \ge \mathop{\mathbb{E_{q_{\phi}(z|x)}}}\Big[\log  \dfrac{p_{\theta}(x,z)}{q_{\phi}(z|x)}\Big]$$
+$$
+\begin{align} \boxed{\log(p_{\theta}(x)) \ge \mathop{\mathbb{E_{q_{\phi}(z|x)}}}\Big[\log  \dfrac{p_{\theta}(x,z)}{q_{\phi}(z|x)}\Big]} \\ 
+\end{align}$$ 
 
 
 Let's denote 
-$$\boxed{ELBO(x) =\mathbb{E_{q_{\phi}(z|x)}} \Big[ \log \dfrac{p_{\theta}(x,z)}{q_{\phi}(z|x)} \Big]} \ (1) $$ 
+$$\begin{align}
+\boxed{ELBO(x) =\mathbb{E_{q_{\phi}(z|x)}} \Big[ \log \dfrac{p_{\theta}(x,z)}{q_{\phi}(z|x)} \Big]} \\
+\end{align}
+$$ 
 
-We have shown that ELBO is a valid lower bound on the log likelihood  of the data. Now let's look more closely at what is this ELBO. 
+From this derivation, we were able to directly arrive at our lower bound directly, but it does not really give us the intuition on why this ELBO is a valid lower bound and why optimize it.
+
+Now, we will try to show that our denoted ELBO is a valid lower bound and its relationship with the log likelihood of the data. 
+
+$$
+\begin{align}
+\log \ p_{\theta}(x) &=\log \ p_{\theta}(x) \displaystyle \int q_{\phi}(z|x) \, \mathrm{d}z \\
+&=\displaystyle \int q_{\phi}(z|x)log \ p_{\theta}(x)  \, \mathrm{d}z \\
+ &= \mathbb{E_{q_{\phi}(z|x)}} \Big[ \log {p_{\theta}(x)} \Big] \\
+ &= \mathbb{E_{q_{\phi}(z|x)}} \Big[ \log  \dfrac{p_{\theta}(x,z)}{p_{\theta}(z|x)} \Big] \\
+ &= \mathbb{E_{q_{\phi}(z|x)}} \Big[ \log  \dfrac{p_{\theta}(x,z){q_{\phi}(z|x)}}{p_{\theta}(z|x){q_{\phi}(z|x)}} \Big] \\
+ &= ELBO + \mathbb{E_{q_{\phi}(z|x)}} \Big[ \log \dfrac{q_{\phi}(z|x)}{p_{\theta}(z|x)}\Big] \\
+\log \ p_{\theta}(x)& = ELBO + \mathbb{D}_{KL} \Big({q_{\phi}(z|x)} \ || \ p_{\theta}(z|x)\Big) 
+\end{align}$$
+
+
+And by definition because $$KL$$ divergence is always positive :
+
+$$\log \ p_{\theta}(x) \geq ELBO $$
+
+So the difference between $$ELBO$$ and our evidence is strictly non negative, thus the $$ELBO$$ can never exceed our evidence and is a valid lower bound.
+
+Now let's look more closely at what is this ELBO and 
 
 By Bayes theorem, we can develop our ELBO to look like : 
 $$ELBO(x)=\mathbb{E_{q_{\phi}(z|x)}} \Big[ \log \dfrac{p_{\theta}(x,z)}{q_{\phi}(z|x)} \Big]$$
@@ -128,16 +157,18 @@ $$ELBO(x)=\mathbb{E_{q_{\phi}(z|x)}}\Big[ \log p_{\theta}(x|z) \Big]+
  \mathbb{E_{q_{\phi}(z|x)}}\Big[\log\dfrac{p(z)}{q_{\phi}(z|x)}\Big]$$
 
 Finally :
-$$ \boxed {ELBO(x)=\mathbb{E_{q_{\phi}(z|x)}}\Big[\log p_{\theta}(x|z) \Big] - \mathbb{D}_{KL} \Big({q_{\phi}(z|x)} \ || \ p_{\theta}(z)\Big) } \ (2) $$ 
+$$\begin{align} 
+\boxed {ELBO(x)=\mathbb{E_{q_{\phi}(z|x)}}\Big[\log p_{\theta}(x|z) \Big] - \mathbb{D}_{KL} \Big({q_{\phi}(z|x)} \ || \ p_{\theta}(z)\Big) } \\
+\end{align} $$ 
 
 * The first term 
 ($$ \mathbb{E_{q_{\phi}(z|x)}} \Big[\log p_{\theta}(x|z) \Big] $$) 
-represent the likelihood and the quality of our decoder. Note here, that the expectation is taken with respect to the sample z, which is sampled from $$ q_{\phi} (z|x) $$ 
+represent the quality of our decoder (the reconstruction term). Note here, that the expectation is taken with respect to the sample z, which is sampled from $$ q_{\phi} (z|x) $$ 
 because we want a meaningful latent vector.
 
 * The second term 
 ($$ \mathbb{D}_{KL} \Big({q_{\phi}(z|x)} \ || \ p_{\theta}(z)\Big) $$)
-the quality of our encoder and act as a regularizer, such that the encoded latent vector will follow our choice of a normal distribution with zero mean and unit variance. 
+the quality of our encoder and act as a regularizer, such that the encoded latent vector will follow our choice of a unit variance gaussian. 
 
 ### *Reparameterization Trick*
 
@@ -209,6 +240,30 @@ $$ \boxed {\theta^{*}, \phi^{*} = \arg \max_{\theta, \phi} \mathcal{L}_{\theta, 
 
 ## Diffusion Models 
 
+In this section, I will try to discuss diffusion in the sense of Variational diffusion Models [[2]](#references). 
+
+Variational diffusion models can be simply seen as a markovian hierachical variational encoders (a VAE with multiple latent variables instead of just one, and where each latent is conditioned on all previous latents), with some conditions :
+
+* The latent dimension is the same as the data 
+* The structure of our encoder is a pred-defined Gaussian dependent on the output of the previous step
+
+
+As resumed by the figure below where:
+
+* $$x_0$$ 
+is the original image
+* $$x_T$$ 
+is the latent variable, we want $$x_T\sim \mathcal{N}(0,I)$$
+* $$x_1,...,x_{T-1}$$ 
+are intermediate states, also latent variable but we don't want them to be white noise
+
+
+{:refdef: style="text-align: center;"}
+![_config.yml]({{ site.baseurl }}/images/Diffusion_intro_1.png)
+{: refdef}
+{:refdef: style="text-align: center;"}
+<figcaption> Figure 3 : Principle of Diffusion</figcaption>
+{: refdef}
 
 
 
@@ -218,4 +273,26 @@ $$ \boxed {\theta^{*}, \phi^{*} = \arg \max_{\theta, \phi} \mathcal{L}_{\theta, 
 
 
 
+
+
+
+
+
+
+## References 
+
+[1] 
+Chan, S. H. (2024). Tutorial on Diffusion Models for Imaging and Vision. arXiv preprint arXiv:2403.18103.
+
+
+[2] Ho, J., Jain, A., & Abbeel, P. (2020). Denoising diffusion probabilistic models. Advances in neural information processing systems, 33, 6840-6851
+
+[3]
+Diederik P. Kingma and Max Welling (2019), “An Introduction to
+Variational Autoencoders”, Foundations and Trends R© in Machine Learning
+
+[4]
+Liu, X., Zhang, F., Hou, Z., Mian, L., Wang, Z., Zhang, J., & Tang, J. (2021). Self-supervised learning: Generative or contrastive. IEEE transactions on knowledge and data engineering, 35(1), 857-876.
+
+[5] Doersch, C. (2016). Tutorial on variational autoencoders. arXiv preprint arXiv:1606.05908.
 
