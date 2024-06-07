@@ -43,8 +43,7 @@ So, if we want to train a generative model, we will want maximize the likelihood
 >$$p(x)$$ 
 >of all observed 
 >$$x$$
->, but because it is unknown in general, we consider a latent variable $$z$$ that we will use to recover our likelihood via a posterior 
->$$p(z|x)$$
+>, but because it is difficult to oompute directly, we consider a latent variable $$z$$ that we will use to recover our likelihood 
 
 Now let's consider some distributions : the one over the observation data, our prior :
 
@@ -78,8 +77,9 @@ Now for the denominator, although in lower dimension we can compute each term. H
 >and $$z=z_{1:m}$$ 
 >with $$n,m \in \mathbb{N^{*}}$$
 >and $$ m<n $$
-> The integral becomes : $$ p(x_i)= \displaystyle \int \sum_{z_{j}} p(z_{j})\prod_{i=1}^{n} p(x_i|z_j) \, \mathrm{d}z_j $$
+> The integral becomes : $$ p(x_i)= \displaystyle \int \sum_{{j}} p(z_{j})\prod_{i=1}^{n} p(x_i|z_j) \, \mathrm{d}z_j $$
 
+To make this more tractable, we approximate 
 
 ### *Evidence Lower Bound*
 
@@ -152,7 +152,7 @@ And by definition because $$KL$$ divergence is always positive :
 
 $$\log \ p_{\theta}(x) \geq ELBO $$
 
-So the difference between $$ELBO$$ and our evidence is strictly non negative, thus the $$ELBO$$ can never exceed our evidence and is a valid lower bound.
+So the difference between $$ELBO$$ and our evidence is clearly non negative, thus the $$ELBO$$ can never exceed our evidence and is a valid lower bound.
 
 Now let's look more closely at what is this ELBO.  
 
@@ -173,7 +173,7 @@ because we want a meaningful latent vector.
 
 * The second term 
 ($$ \mathbb{D}_{KL} \Big({q_{\phi}(z|x)} \ || \ p_{\theta}(z)\Big) $$)
-the quality of our encoder and act as a regularizer, such that the encoded latent vector will follow our choice of a unit variance gaussian. 
+represent the quality of our encoder and act as a regularizer, such that the encoded latent vector will follow our choice of a unit variance gaussian. 
 
 ### *Reparameterization Trick*
 
@@ -181,7 +181,7 @@ We found a valid lower bound for our distribution which is our $$ELBO$$ which is
 
 So we can wirte that for a given dataset, the $$ELBO$$ objective can be expressed as :
 
-$$ \mathcal{L}_{\theta,\phi} \big(x\big) = \sum_{x_i} ELBO(x_i) $$
+$$ \mathcal{L}_{\theta,\phi} \big(x\big) = \sum_{i} ELBO(x_i) $$
 
 Now let's look at is gradient  :
 
@@ -228,9 +228,9 @@ Variational Autoencoders”, Foundations and Trends R© in Machine Learning)</fi
 {: refdef}
 
 ### *Training*  
-After everything said, the loss function in our case is simply (with Monte-Carlo simulation):
+After everything said, the loss function in our case is simply (with Monte-Carlo simulation, with D the number of samples in our dataset):
 
-$$\mathcal{L}_{\theta,\phi} \simeq \frac{1}{D} \sum_{i=1}^{D} log \ p_{\theta}(x^{i}| z^{i}) + \mathbb{D}_{KL}\big(q_{\phi}(z|x^{i})\ ||p_{\theta}(z)\big)   $$
+$$\mathcal{L}_{\theta,\phi} \simeq \frac{1}{D} \sum_{i=1}^{D} log \ p_{\theta}(x^{i}| z^{i}) - \mathbb{D}_{KL}\big(q_{\phi}(z|x^{i})\ ||p_{\theta}(z)\big)   $$
 
 So, we are searching for the $$\theta$$ and $$\phi$$ which will maximize $$  \mathcal{L}_{\theta,\phi} $$ 
 . In another word, we want to find  :
