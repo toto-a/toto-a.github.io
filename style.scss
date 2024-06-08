@@ -17,6 +17,8 @@ html {
   font-size: 100%;
 }
 
+
+
 body {
 	background: $white;
   font: 18px/1.4 $helvetica;
@@ -281,6 +283,13 @@ nav {
 footer {
   padding: 20px 0;
   text-align: center;
+}
+
+.commment-block {
+  border : 1px solid #ccc;
+  padding : 10px ;
+  margin : 10px 0;
+  background-color: #f9f9f9;
 }
 
 // Settled on moving the import of syntax highlighting to the bottom of the CSS
