@@ -77,7 +77,7 @@ Now for the denominator, although in lower dimension we can compute each term. H
 >and $$z=z_{1:m}$$ 
 >with $$n,m \in \mathbb{N^{*}}$$
 >and $$ m<n $$
-> The integral becomes : $$ p(x_i)= \displaystyle \int \sum_{{j}} p(z_{j})\prod_{i=1}^{n} p(x_i|z_j) \, \mathrm{d}z_j $$
+> The integral becomes : $$ p(x_i)= \displaystyle \int \sum_{j} p(z_{j})\prod_{i=1}^{n} p(x_i|z_j) \, \mathrm{d}z_j $$
 
 To make this more tractable, we approximate 
 
