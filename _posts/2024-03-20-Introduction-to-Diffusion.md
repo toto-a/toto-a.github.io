@@ -245,7 +245,7 @@ $$ \boxed {\theta^{*}, \phi^{*} = \arg \max_{\theta, \phi} \mathcal{L}_{\theta, 
 
 ## Diffusion Models 
 
-In this section, I will try to discuss diffusion in the sense of Variational diffusion Models [[2]](#references). 
+In this section, I will try to discuss diffusion in the sense of Variational diffusion Models or DDPM (denoising diffusion probabilistic model) [[2]](#references). 
 
 Variational diffusion models can be simply seen as a markovian hierachical variational encoders (a VAE with multiple latent variables instead of just one, and where each latent is conditioned on all previous latents), with some conditions :
 
@@ -270,11 +270,82 @@ are intermediate states, also latent variable but we don't want them to be white
 <figcaption> Figure 3 : Principle of Diffusion</figcaption>
 {: refdef}
 
+With the same reasoning that we did with VAE, because the transition and reverse distribution is not known, we will try to approximate them. 
 
 
 
+So the reverse transition
+$$ p(x_t|x_{t+1}) $$
+is approximated by a Gaussian 
+$$ p_{\theta}(x_t|x_{t+1}) $$
+and the transition
+$$ p(x_t|x_{t-1}) $$ 
+by 
+$$ q_{\phi}(x_t|x_{t-1}) $$
 
 
+For the transition distribution, let's define it as follows :
+$$ q(x_t|x_{t-1})=\mathcal{N}(x_t\ |\ \sqrt \alpha_t x_{t-1}, (1-\alpha_t)I) $$
+
+The coefficients are chosen such that the variance of the latent variables stays at a similar scale. 
+
+>> But why this choice of 
+>>$$\sqrt\alpha_t $$ 
+>> and $$(1-\alpha_t)$$
+>> you might ask yourself ? 
+>>
+>>We know, that since our transition gaussian is in the form of 
+>> $$q(x_t|x_{t-1})=\mathcal{N} (x_t|ax_{t-1}, b^2I) $$
+>> with $$a,b \in \mathbb{R}$$
+>>With the reparametrization trick, we can define  
+>>$$x_t$$
+>>as
+>>$$x_t=ax_{t-1} + b\epsilon_{t-1}$$
+>>where $$\epsilon_{t-1} \sim \mathcal{N}(0,I)$$
+>>Now we can easily show that
+>> $$x_t=a^tx_0 + b\sum_{k=0}^{t-1}a^{(t-1)-k}\epsilon_k$$
+>> The second term is just a sum of independant gaussian let's denote it as  
+>>$$z_t$$
+>> Because of that : 
+>> $$\mathbb{E}[z_t]=0$$
+>> And for the variance
+>> $$Var[z_t]=Cov(z_t,z_t)$$
+>>and because of the bilinearity property of the covariance
+>>$$\begin{align}
+>>Cov(z_t,z_t)=Cov(b\sum_{k=0}^{t-1}a^{(t-1)-k}\epsilon_k,b\sum_{l=0}^{t-1}a^{(t-1)-k}\epsilon_l) \\
+>>=b^2\sum_{i=0}^{t-1}\sum_{j=0}^{t-1}Cov(a^{(t-1)-k}\epsilon_k,a^{(t-1)-l}\epsilon_l) \\
+>>\end{align}$$
+>> and because each term is independant and the 
+>>$$\epsilon_k \sim \mathcal{N}(0,I)$$
+>>
+>>$$\begin{align}
+>>Cov(z_t,z_t)= b^2\sum_{k=0}^{t-1}Var(a^{(t-1)-k}\epsilon_k )\\
+>>= b^2 \sum_{k=0}^{t-1}a^{2((t-1)-k)}\\
+>>= b^2 \frac{1-a^2t}{1-a^2}\end{align}$$
+>> So for any 
+>> $$ 0<a<1 $$
+>> and when 
+>> $$ t \to {+\infty} $$
+>> $$ \lim_{t \to {+\infty}} Var(z_t) = \frac{b^2}{1-a^2} $$
+>> And because we want our distribution of 
+>> $$x_t$$
+>> to approach 
+>> $$ \mathcal{N}(0,I) $$
+>> .The 
+>> $$  \lim_{t \to {+\infty}} Var(z_t) =I$$ 
+>> Then 
+>> $$b=\sqrt{1-a^2}$$
+>> So we can let, 
+>> $$a=\sqrt\alpha$$
+>> for any 
+>> $$\alpha \in \left[ 0,1\right]$$
+>>then 
+>>$$ b= 1-\alpha$$
+>> Finally we can write  : 
+>> $$x_t=\sqrt \alpha_t x_{t-1} + (1-\alpha_t)\epsilon_{t-1}$$
+
+
+### *ELBO*
 
 
 
