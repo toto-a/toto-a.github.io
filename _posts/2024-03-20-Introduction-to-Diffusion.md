@@ -123,13 +123,15 @@ With Jensen inequality, we obtain :
 
 $$
 \begin{align} \boxed{\log(p_{\theta}(x)) \ge \mathop{\mathbb{E_{q_{\phi}(z|x)}}}\Big[\log  \dfrac{p_{\theta}(x,z)}{q_{\phi}(z|x)}\Big]} \\ 
-\end{align}$$ 
+\end{align}
+\tag{1}$$ 
 
 
 Let's denote 
 $$\begin{align}
 \boxed{ELBO(x) =\mathbb{E_{q_{\phi}(z|x)}} \Big[ \log \dfrac{p_{\theta}(x,z)}{q_{\phi}(z|x)} \Big]} \\
 \end{align}
+\tag{2}
 $$ 
 
 From this derivation, we were able to directly arrive at our lower bound directly, but it does not really give us the intuition on why this ELBO is a valid lower bound and why optimize it.
@@ -164,7 +166,7 @@ $$ELBO(x)=\mathbb{E_{q_{\phi}(z|x)}}\Big[ \log p_{\theta}(x|z) \Big]+
 Finally :
 $$\begin{align} 
 \boxed {ELBO(x)=\mathbb{E_{q_{\phi}(z|x)}}\Big[\log p_{\theta}(x|z) \Big] - \mathbb{D}_{KL} \Big({q_{\phi}(z|x)} \ || \ p_{\theta}(z)\Big) } \\
-\end{align} $$ 
+\end{align} \tag{1}$$ 
 
 * The first term 
 ($$ \mathbb{E_{q_{\phi}(z|x)}} \Big[\log p_{\theta}(x|z) \Big] $$) 
@@ -235,7 +237,7 @@ $$\mathcal{L}_{\theta,\phi} \simeq \frac{1}{D} \sum_{i=1}^{D} log \ p_{\theta}(x
 So, we are searching for the $$\theta$$ and $$\phi$$ which will maximize $$  \mathcal{L}_{\theta,\phi} $$ 
 . In another word, we want to find  :
 
-$$ \boxed {\theta^{*}, \phi^{*} = \arg \max_{\theta, \phi} \mathcal{L}_{\theta, \phi}} $$
+$$ \boxed {\theta^{*}, \phi^{*} = \arg \max_{\theta, \phi} \mathcal{L}_{\theta, \phi}}  \tag{3}$$
 
 
 >So to resume what we saw : 
@@ -287,7 +289,7 @@ $$ q_{\phi}(x_t|x_{t-1}) $$
 For the transition distribution, let's define it as follows :
 $$ q(x_t|x_{t-1})=\mathcal{N}(x_t\ |\ \sqrt \alpha_t x_{t-1}, (1-\alpha_t)I) $$
 
-The coefficients are chosen such that the variance of the latent variables stays at a similar scale. 
+The coefficients are chosen such that the variance of the latent variables stays at a similar scale. Note here, that our $$ q_{\phi} $$ is fully known, as it is modeled as a Gaussian with definitive mean and variance for each timestep. So in diffusion(DDPM), we are primarly interested in the reverse conditional distribution $$p_{\theta}$$ which we will use to simulate new data
 
 
 
@@ -363,6 +365,22 @@ The coefficients are chosen such that the variance of the latent variables stays
 
 
 ### *ELBO*
+
+Before looking at the ELBO for our case, let's rewrite some things that will be useful later. 
+
+$$q_{\phi} (x_{1:t}|x_0)=\prod_{t=1}^Tq_{\phi}(x_t|x_{t-1})$$ 
+$$ p_{\theta} (x_{0:t}) = p_{\theta}(x_T)\prod_{t=1}^{T} p_{\theta} (x_{t-1}|x_t) $$
+
+For the ELBO, we will follow the same steps as we did for the VAE, with very small differences.
+$$\begin{align}
+\log p_{\theta}(x_{0:t})&=\int \frac {q_{\phi}(x_{1:t}|x_0)\ p_{\theta}(x_{0:t}) }{q_{\phi}(x_{1:t}|x_0)} \ \ \mathrm{d}{x_{1:t}} \\
+&= \log \mathbb{E_{q_{\phi}(x_{1:t}  |   x_0)} } \Big(\ \frac{p_{\theta}(x_{0:t}) }{q_{\phi}(x_{1:t}|x_0)} \ \Big) \\
+&\geq  \mathbb{E_{q_{\phi}(x_{1:t}  |   x_0)} } \Big(\log \ \frac{p_{\theta}(x_{0:t}) }{q_{\phi}(x_{1:t}|x_0)} \ \Big) \\
+\end{align}$$
+
+With the things defined above we can further simplify the above expression :
+
+
 
 
 
