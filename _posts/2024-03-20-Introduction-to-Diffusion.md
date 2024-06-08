@@ -316,10 +316,9 @@ The coefficients are chosen such that the variance of the latent variables stays
 >has zero mean  
 > $$\mathbb{E}[z_t]=0$$
 >
-> And for the variance
+> For the variance, since 
 > $$Var[z_t]=Cov(z_t,z_t)$$
->
->and because of the bilinearity property of the covariance : 
+>,and because of the bilinearity property of the covariance : 
 >
 >$$\begin{align}
 >Cov(z_t,z_t)&=Cov(b\sum_{k=0}^{t-1}a^{(t-1)-k}\epsilon_k,b\sum_{l=0}^{t-1}a^{(t-1)-k}\epsilon_l) \\
@@ -355,7 +354,7 @@ The coefficients are chosen such that the variance of the latent variables stays
 > $$a=\sqrt\alpha$$
 >, for any 
 > $$\alpha \in \left[ 0,1\right]$$
->then $ \ $
+>then 
 >$$ b= 1-\alpha$$
 >.
 >
