@@ -383,7 +383,7 @@ $$\begin{align}
 
 With the things defined befor we can further simplify the above expression to obtain that : 
 
-<!-- $$\begin{align}
+$$\begin{align}
 \log p_{\theta}(x_{0:t})
 &\geq  \mathbb{E_{q_{\phi}(x_{1:T}  |   x_0)} } \Big[\log \ \frac{p_{\theta}(x_{0:t}) }{q_{\phi}(x_{1:t}|x_0)} \ \Big] \\
 \\
@@ -398,10 +398,10 @@ With the things defined befor we can further simplify the above expression to ob
 \\
 &=  \mathbb{E_{q_{\phi}(x_{1:T}  |   x_0)} } \Big[ \log \ p_{\theta}(x_0|x_1)\Big] + \mathbb{E_{q_{\phi}(x_{1:T}  |   x_0)} } \Big[ \log \ \frac{p_{\theta}(x_T)}{{q_{\phi}(x_T|x_{T-1})}} \Big] +
 \sum_{t=1}^{t-1} \mathbb{E_{q_{\phi}(x_{t}  |   x_0)} } \Big[ \log \ \frac{ p_{\theta} (x_{t}|x_{t+1}) }{ q_{\phi}(x_t|x_{t-1})}\ \Big] \\
-\end{align}$$ -->
+\end{align}$$
 
-<!-- The conditioning in the first term can be simplified to $ x_1|x_0 $ By applying the same reasoning to the second and last terms, we obtain: -->
-<!-- 
+The conditioning in the first term can be simplified to $ x_1|x_0 $ By applying the same reasoning to the second and last terms, we obtain:
+
 $$ \mathbb{E_{q_{\phi}(x_{1}  |   x_0)} } \Big[ \log \ p_{\theta}(x_0|x_1)\Big] + \mathbb{E_{q_{\phi}(x_{T}, x_{T-1}  |   x_0)} } \Big[ \log \ \frac{p_{\theta}(x_T)}{{q_{\phi}(x_T|x_{T-1})}} \Big] +
 \sum_{t=1}^{t-1} \mathbb{E_{q_{\phi}(x_{t},x_{t+1},x_{t-1}  |   x_0)} } \Big[ \log \ \frac{ p_{\theta} (x_{t}|x_{t+1}) }{ q_{\phi}(x_t|x_{t-1})}\ \Big] $$ 
 
@@ -410,16 +410,16 @@ $$\\$$
 Finally we obtain for our ELBO : 
 
 $$ \boxed{ELBO(x) = \underbrace{\mathbb{E_{q_{\phi}(x_{1}  |   x_0)} } \Big[ \log \ p_{\theta}(x_0|x_1)\Big]}_\text{Reconstruction term} -
-\underbrace{\mathbb{E_{q_{\phi}(x_{T-1} |   x_0)} }\Big[ \ {\mathbb{D_{KL}} \Big[  {q_{\phi}(x_T|x_{T-1})} \ || \ p_{\theta}(x_T) \ \Big]}\Big]}_\text{Prior Matching} -
+\underbrace{\mathbb{E_{q_{\phi}(x_{T-1} |   x_0)} }\Big[ \ {\mathbb{D_{KL}} \Big[  {q_{\phi}(x_T|x_{T-1})} \ || \ p_{\theta}(x_T) \ \Big]}\Big]}_\text{Prior Matching} 
 
-\underbrace{\sum_{t=1}^{t-1}\mathbb{E_{q_{\phi}(x_{t-1},x_{t+1}  |   x_0)} } \Big[ \ \mathbb{D_{KL}} \Big[ \   q_{\phi}(x_t|x_{t-1}) || p_{\theta} (x_{t}|x_{t+1}) \ \Big] \ \Big]} _\text{Consitency Term}}$$ -->
+\underbrace{\sum_{t=1}^{t-1}\mathbb{E_{q_{\phi}(x_{t-1},x_{t+1}  |   x_0)} } \Big[ \ \mathbb{D_{KL}} \Big[ \   q_{\phi}(x_t|x_{t-1}) || p_{\theta} (x_{t}|x_{t+1}) \ \Big] \ \Big]} _\text{Consitency Term}}$$
 
-<!-- * The Reconstruction term can be interpreted the same way as in the vanilla VAE. We measure how good our neural network can recover $x_0$ from $x_1$ sampled from $ q_{\phi} (x_1|x_0) $
+* The Reconstruction term can be interpreted the same way as in the vanilla VAE. We measure how good our neural network can recover $x_0$ from $x_1$ sampled from $ q_{\phi} (x_1|x_0) $ .
 
 * The second term, the prior matching describe the final block. This term brings closer our $ q_{\phi} (x_{T}|x_{T-1}) $
-to an isotropic gaussian  -->
+to an isotropic gaussian.
 
-<!-- * The third term, the consistency term describes the intermediates states, it measures the deviation to make $ x_t $ consistant from both the transiton and reverse state.  -->
+* The third term, the consistency term describes the intermediates states, it measures the deviation to make $ x_t $ consistant from both the transiton and reverse state. 
 
 
 
