@@ -285,12 +285,7 @@ footer {
   text-align: center;
 }
 
-.commment-block {
-  border : 1px solid #ccc;
-  padding : 10px ;
-  margin : 10px 0;
-  background-color: #f9f9f9;
-}
+
 
 // Settled on moving the import of syntax highlighting to the bottom of the CSS
 // ... Otherwise it really bloats up the top of the CSS file and makes it difficult to find the start
