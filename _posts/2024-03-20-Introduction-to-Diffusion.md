@@ -344,7 +344,7 @@ The coefficients are chosen such that the variance of the latent variables stays
 > Because we want our distribution of 
 > $$x_t$$
 > to approach 
-> $$ \mathcal{N}(0,I) $$ 
+> an isotropic gaussian 
 > as t grows
 >,
 > $$  \lim_{t \to {+\infty}} Var(z_t) =I$$ 
@@ -376,12 +376,45 @@ For the ELBO, we will follow the same steps as we did for the VAE, with very sma
 $$ $$
 
 $$\begin{align}
-\log p_{\theta}(x_{0:t})&=\int \frac {q_{\phi}(x_{1:t}|x_0)\ p_{\theta}(x_{0:t}) }{q_{\phi}(x_{1:t}|x_0)} \ \ \mathrm{d}{x_{1:t}} \\
-&= \log \mathbb{E_{q_{\phi}(x_{1:t}  |   x_0)} } \Big(\ \frac{p_{\theta}(x_{0:t}) }{q_{\phi}(x_{1:t}|x_0)} \ \Big) \\
-&\geq  \mathbb{E_{q_{\phi}(x_{1:t}  |   x_0)} } \Big(\log \ \frac{p_{\theta}(x_{0:t}) }{q_{\phi}(x_{1:t}|x_0)} \ \Big) \\
+\log p_{\theta}(x_{0:T})&=\int \frac {q_{\phi}(x_{1:t}|x_0)\ p_{\theta}(x_{0:t}) }{q_{\phi}(x_{1:t}|x_0)} \ \ \mathrm{d}{x_{1:T}} \\
+&= \log \mathbb{E_{q_{\phi}(x_{1:T}  |   x_0)} } \Big(\ \frac{p_{\theta}(x_{0:t}) }{q_{\phi}(x_{1:t}|x_0)} \ \Big) \\
+&\geq  \mathbb{E_{q_{\phi}(x_{1:T}  |   x_0)} } \Big[\log \ \frac{p_{\theta}(x_{0:t}) }{q_{\phi}(x_{1:t}|x_0)} \ \Big] \\
 \end{align}$$
 
 With the things defined above we can further simplify the above expression :
+
+$$\begin{align}
+\log p_{\theta}(x_{0:t})
+&\geq  \mathbb{E_{q_{\phi}(x_{1:T}  |   x_0)} } \Big[\log \ \frac{p_{\theta}(x_{0:t}) }{q_{\phi}(x_{1:t}|x_0)} \ \Big] \\
+\\
+&= \mathbb{E_{q_{\phi}(x_{1:T}  |   x_0)} } \Big[\log \ \frac{p_{\theta}(x_T) \prod_{t=1}^{T} p_{\theta} (x_{t-1}|x_t) }{\prod_{t=1}^T q_{\phi}(x_t|x_{t-1})}\ \Big] \\
+\\
+&= \mathbb{E_{q_{\phi}(x_{1:T}  |   x_0)} } \Big[\log \ \frac{p_{\theta}(x_T) p_{\theta}(x_0|x_1) \prod_{t=2}^{T} p_{\theta} (x_{t-1}|x_t) }{q_{\phi}(x_T|x_{T-1})\prod_{t=1}^{T-1} q_{\phi}(x_t|x_{t-1})}\ \Big] \\
+\\
+&= \mathbb{E_{q_{\phi}(x_{1:T}  |   x_0)} } \Big[\log \ \frac{p_{\theta}(x_T) p_{\theta}(x_0|x_1) \prod_{t=1}^{T-1} p_{\theta} (x_{t}|x_{t+1}) }{q_{\phi}(x_T|x_{T-1})\prod_{t=1}^{T-1} q_{\phi}(x_t|x_{t-1})}\ \Big] \\
+\\
+&=  \mathbb{E_{q_{\phi}(x_{1:T}  |   x_0)} } \Big[ \log \ p_{\theta}(x_0|x_1)\Big] + \mathbb{E_{q_{\phi}(x_{1:T}  |   x_0)} } \Big[ \log \ \frac{p_{\theta}(x_T)}{{q_{\phi}(x_T|x_{T-1})}} \Big] +
+\mathbb{E_{q_{\phi}(x_{1:T}  |   x_0)} } \Big[ \log \ \frac{ \prod_{t=1}^{T-1} p_{\theta} (x_{t}|x_{t+1}) }{\prod_{t=1}^{T-1} q_{\phi}(x_t|x_{t-1})}\ \Big] \\
+\\
+&=  \mathbb{E_{q_{\phi}(x_{1:T}  |   x_0)} } \Big[ \log \ p_{\theta}(x_0|x_1)\Big] + \mathbb{E_{q_{\phi}(x_{1:T}  |   x_0)} } \Big[ \log \ \frac{p_{\theta}(x_T)}{{q_{\phi}(x_T|x_{T-1})}} \Big] +
+\sum_{t=1}^{t-1} \mathbb{E_{q_{\phi}(x_{t}  |   x_0)} } \Big[ \log \ \frac{ p_{\theta} (x_{t}|x_{t+1}) }{ q_{\phi}(x_t|x_{t-1})}\ \Big] \\
+\end{align}$$
+
+The conditioning in the first term can be simplified to $$x_1|x_0$$ By applying the same reasoning to the second and last terms, we obtain:
+
+$$ \mathbb{E_{q_{\phi}(x_{1}  |   x_0)} } \Big[ \log \ p_{\theta}(x_0|x_1)\Big] + \mathbb{E_{q_{\phi}(x_{T}, x_{T-1}  |   x_0)} } \Big[ \log \ \frac{p_{\theta}(x_T)}{{q_{\phi}(x_T|x_{T-1})}} \Big] +
+\sum_{t=1}^{t-1} \mathbb{E_{q_{\phi}(x_{t},x_{t+1},x_{t-1}  |   x_0)} } \Big[ \log \ \frac{ p_{\theta} (x_{t}|x_{t+1}) }{ q_{\phi}(x_t|x_{t-1})}\ \Big] $$ 
+
+$$\\$$
+
+Finally we obtain for our ELBO : 
+
+$$ \boxed{ELBO(x) = \underbrace{\mathbb{E_{q_{\phi}(x_{1}  |   x_0)} } \Big[ \log \ p_{\theta}(x_0|x_1)\Big]}_\text{Reconstruction term} -
+\underbrace{\mathbb{E_{q_{\phi}(x_{T-1} |   x_0)} }{\mathbb{D_{KL}} \Big[  {q_{\phi}(x_T|x_{T-1})} \ || \ p_{\theta}(x_T) \Big]}}_\text{Prior Matching} -
+
+\underbrace{\sum_{t=1}^{t-1}\mathbb{E_{q_{\phi}(x_{t-1},x_{t+1}  |   x_0)} }  \mathbb{D_{KL}} \Big[ \   q_{\phi}(x_t|x_{t-1}) || p_{\theta} (x_{t}|x_{t+1}) \ \Big] }}_\text{Consitency Term}$$
+
+
 
 
 
