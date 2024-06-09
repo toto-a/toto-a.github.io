@@ -383,7 +383,7 @@ $$\begin{align}
 
 With the things defined above we can further simplify the above expression :
 
-$$\begin{align}
+<!-- $$\begin{align}
 \log p_{\theta}(x_{0:t})
 &\geq  \mathbb{E_{q_{\phi}(x_{1:T}  |   x_0)} } \Big[\log \ \frac{p_{\theta}(x_{0:t}) }{q_{\phi}(x_{1:t}|x_0)} \ \Big] \\
 \\
@@ -398,7 +398,7 @@ $$\begin{align}
 \\
 &=  \mathbb{E_{q_{\phi}(x_{1:T}  |   x_0)} } \Big[ \log \ p_{\theta}(x_0|x_1)\Big] + \mathbb{E_{q_{\phi}(x_{1:T}  |   x_0)} } \Big[ \log \ \frac{p_{\theta}(x_T)}{{q_{\phi}(x_T|x_{T-1})}} \Big] +
 \sum_{t=1}^{t-1} \mathbb{E_{q_{\phi}(x_{t}  |   x_0)} } \Big[ \log \ \frac{ p_{\theta} (x_{t}|x_{t+1}) }{ q_{\phi}(x_t|x_{t-1})}\ \Big] \\
-\end{align}$$
+\end{align}$$ -->
 
 The conditioning in the first term can be simplified to $$x_1|x_0$$ By applying the same reasoning to the second and last terms, we obtain:
 
