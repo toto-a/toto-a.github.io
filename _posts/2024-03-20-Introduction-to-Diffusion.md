@@ -410,11 +410,16 @@ $$\\$$
 Finally we obtain for our ELBO : 
 
 $$ \boxed{ELBO(x) = \underbrace{\mathbb{E_{q_{\phi}(x_{1}  |   x_0)} } \Big[ \log \ p_{\theta}(x_0|x_1)\Big]}_\text{Reconstruction term} -
-\underbrace{\mathbb{E_{q_{\phi}(x_{T-1} |   x_0)} }{\mathbb{D_{KL}} \Big[  {q_{\phi}(x_T|x_{T-1})} \ || \ p_{\theta}(x_T) \Big]}}_\text{Prior Matching} -
+\underbrace{\mathbb{E_{q_{\phi}(x_{T-1} |   x_0)} }\Big[ \ {\mathbb{D_{KL}} \Big[  {q_{\phi}(x_T|x_{T-1})} \ || \ p_{\theta}(x_T) \ \Big]}\Big]}_\text{Prior Matching} -
 
-\underbrace{\sum_{t=1}^{t-1}\mathbb{E_{q_{\phi}(x_{t-1},x_{t+1}  |   x_0)} }  \mathbb{D_{KL}} \Big[ \   q_{\phi}(x_t|x_{t-1}) || p_{\theta} (x_{t}|x_{t+1}) \ \Big] }}_\text{Consitency Term}$$
+\underbrace{\sum_{t=1}^{t-1}\mathbb{E_{q_{\phi}(x_{t-1},x_{t+1}  |   x_0)} } \Big[ \ \mathbb{D_{KL}} \Big[ \   q_{\phi}(x_t|x_{t-1}) || p_{\theta} (x_{t}|x_{t+1}) \ \Big] \ \Big]} _\text{Consitency Term}}$$
 
-The Reconstruction term can be interpreted the same way as in the vanilla VAE. We measure how good our neural network can recover $$x_0$$ from $$x_1$$ sampled from $$ q_{\phi} (x_1|x_0) $$ 
+* The Reconstruction term can be interpreted the same way as in the vanilla VAE. We measure how good our neural network can recover $$x_0$$ from $$x_1$$ sampled from $$ q_{\phi} (x_1|x_0) $$ 
+
+* The second term, the prior matching describe the final block. This term brings closer our $$ q_{\phi} (x_{T}|x_{T-1}) $$ 
+to an isotropic gaussian 
+
+* The third term, the consistency term describes the intermediates states, it measures the deviation to make $$ x_t$$ consistant from both the transiton and reverse state. 
 
 
 
