@@ -373,6 +373,8 @@ $$ q_{\phi} (x_{1:t}|x_0)= \prod_{t=1}^T q_{\phi}(x_t|x_{t-1}) $$
 $$ p_{\theta} (x_{0:t}) = p_{\theta}(x_T) \prod_{t=1}^{T} p_{\theta} (x_{t-1}|x_t) $$
 
 For the ELBO, we will follow the same steps as we did for the VAE, with very small differences.
+$$ $$
+
 $$\begin{align}
 \log p_{\theta}(x_{0:t})&=\int \frac {q_{\phi}(x_{1:t}|x_0)\ p_{\theta}(x_{0:t}) }{q_{\phi}(x_{1:t}|x_0)} \ \ \mathrm{d}{x_{1:t}} \\
 &= \log \mathbb{E_{q_{\phi}(x_{1:t}  |   x_0)} } \Big(\ \frac{p_{\theta}(x_{0:t}) }{q_{\phi}(x_{1:t}|x_0)} \ \Big) \\
