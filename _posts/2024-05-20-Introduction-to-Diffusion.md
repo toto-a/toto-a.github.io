@@ -402,7 +402,7 @@ The conditioning in the first term can be simplified to
 $$ x_1|x_0 $$
 .By applying the same reasoning to the second and last terms, we obtain:
 
-$$ \mathbb{E_{q_{\phi}(x_{1}  |   x_0)} } \Big[ \log \ p_{\theta}(x_0|x_1)\Big] + \mathbb{E_{q_{\phi}(x_{T}, x_{T-1}  |   x_0)} } \Big[ \log \ \frac{p_{\theta}(x_T)}{q_{\phi}(x_T|x_{T-1})} \Big] +
+- $$ \mathbb{E_{q_{\phi}(x_{1}  |   x_0)} } \Big[ \log \ p_{\theta}(x_0|x_1)\Big] + \mathbb{E_{q_{\phi}(x_{T}, x_{T-1}  |   x_0)} } \Big[ \log \ \frac{p_{\theta}(x_T)}{q_{\phi}(x_T|x_{T-1})} \Big] +
 \sum_{t=1}^{t-1} \mathbb{E_{q_{\phi}(x_{t},x_{t+1},x_{t-1}  |   x_0)} } \Big[ \log \ \frac{ p_{\theta} (x_{t}|x_{t+1}) }{ q_{\phi}(x_t|x_{t-1})}\ \Big] $$ 
 
 $$\\$$
@@ -410,8 +410,7 @@ $$\\$$
 Finally we obtain for our ELBO : 
 
 $$ \boxed{ELBO(x) = \underbrace{\mathbb{E_{q_{\phi}(x_{1}  |   x_0)} } \Big[ \log \ p_{\theta}(x_0|x_1)\Big]}_\text{Reconstruction term} -
-\underbrace{\mathbb{E_{q_{\phi}(x_{T-1} |   x_0)} }\Big[ \ {\mathbb{D_{KL}} \Big[  {q_{\phi}(x_T|x_{T-1})} \ || \ p_{\theta}(x_T) \ \Big]}\Big]}_\text{Prior Matching} 
-
+\underbrace{\mathbb{E_{q_{\phi}(x_{T-1} |   x_0)} }\Big[ \ {\mathbb{D_{KL}} \Big[  {q_{\phi}(x_T|x_{T-1})} \ || \ p_{\theta}(x_T) \ \Big]}\Big]}_\text{Prior Matching}
 \underbrace{\sum_{t=1}^{t-1}\mathbb{E_{q_{\phi}(x_{t-1},x_{t+1}  |   x_0)} } \Big[ \ \mathbb{D_{KL}} \Big[ \   q_{\phi}(x_t|x_{t-1}) || p_{\theta} (x_{t}|x_{t+1}) \ \Big] \ \Big]} _\text{Consitency Term}}$$
 
 * The Reconstruction term can be interpreted the same way as in the vanilla VAE. We measure how good our neural network can recover 
