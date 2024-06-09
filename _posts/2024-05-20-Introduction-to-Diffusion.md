@@ -410,7 +410,7 @@ $$\\$$
 Finally we obtain for our ELBO : 
 
 $$ \boxed{ELBO(x) = \underbrace{\mathbb{E_{q_{\phi}(x_{1}  |   x_0)} } \Big[ \log \ p_{\theta}(x_0|x_1)\Big]}_\text{Reconstruction term} -
-\underbrace{\mathbb{E_{q_{\phi}(x_{T-1} |   x_0)} }\Big[ \ {\mathbb{D_{KL}} \Big[  {q_{\phi}(x_T|x_{T-1})} \ || \ p_{\theta}(x_T) \ \Big]}\Big]}_\text{Prior Matching}
+\underbrace{\mathbb{E_{q_{\phi}(x_{T-1} |   x_0)} }\Big[ \ {\mathbb{D_{KL}} \Big[  {q_{\phi}(x_T|x_{T-1})} \ || \ p_{\theta}(x_T) \ \Big]}\Big]}_\text{Prior Matching} +
 \underbrace{\sum_{t=1}^{t-1}\mathbb{E_{q_{\phi}(x_{t-1},x_{t+1}  |   x_0)} } \Big[ \ \mathbb{D_{KL}} \Big[ \   q_{\phi}(x_t|x_{t-1}) || p_{\theta} (x_{t}|x_{t+1}) \ \Big] \ \Big]} _\text{Consitency Term}}$$
 
 * The Reconstruction term can be interpreted the same way as in the vanilla VAE. We measure how good our neural network can recover 
@@ -428,6 +428,17 @@ to an isotropic gaussian.
 * The third term, the consistency term describes the intermediates states, it measures the deviation to make 
 $$ x_t $$ 
 consistant from both the transiton and reverse state. 
+
+
+Observe here that for the consistency term, we sample from a joint distribution 
+$$q_{\phi}(x_{t-1},x_{t+1}  |   x_0)$$
+meaning we use the random variables 
+$${x_{t-1},x_{t+1}} $$
+to draw the current sample 
+$$x_t$$ 
+which may seem a little odd, and also because the two distributions are moving in opposite direction. 
+
+Let us try remedy all of this : 
 
 
 
@@ -457,3 +468,4 @@ Liu, X., Zhang, F., Hou, Z., Mian, L., Wang, Z., Zhang, J., & Tang, J. (2021). S
 
 [5] Doersch, C. (2016). Tutorial on variational autoencoders. arXiv preprint arXiv:1606.05908.
 
+[6] This awesome blog by Lilian Weng : https://lilianweng.github.io/posts/2021-07-11-diffusion-models/
