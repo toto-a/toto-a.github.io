@@ -381,7 +381,7 @@ $$\begin{align}
 &\geq  \mathbb{E_{q_{\phi}(x_{1:T}  |   x_0)} } \Big[\log \ \frac{p_{\theta}(x_{0:t}) }{q_{\phi}(x_{1:t}|x_0)} \ \Big] \\
 \end{align}$$
 
-With the things defined above we can further simplify the above expression :
+With the things defined befor we can further simplify the above expression to obtain that : 
 
 <!-- $$\begin{align}
 \log p_{\theta}(x_{0:t})
@@ -419,7 +419,7 @@ $$ \boxed{ELBO(x) = \underbrace{\mathbb{E_{q_{\phi}(x_{1}  |   x_0)} } \Big[ \lo
 * The second term, the prior matching describe the final block. This term brings closer our $ q_{\phi} (x_{T}|x_{T-1}) $
 to an isotropic gaussian  -->
 
-* The third term, the consistency term describes the intermediates states, it measures the deviation to make $ x_t $ consistant from both the transiton and reverse state. 
+<!-- * The third term, the consistency term describes the intermediates states, it measures the deviation to make $ x_t $ consistant from both the transiton and reverse state.  -->
 
 
 
