@@ -13,7 +13,9 @@ In this blog post, I will try to explain and show with code the basis of modern 
 
 ## Embeddings
 For position emebdings, there are different type : absolute, relative and learnt.
-Absolute position embeddings as described in the paper [[1]](#references)
+Absolute position embeddings as described in the paper [[1]](#references) :
+
+
 
 
 
@@ -59,6 +61,8 @@ class CausalAttention(nn.Module) :
 
 ## MLP
 
+Once attention has moved to relevant info in the residual stream, we will use MLPs to do some reasoning on those informations
+
 With SILU : 
 
 ```python 
@@ -97,3 +101,5 @@ class RMSNorm(torch.nn.Module):
 ## References
 
 [1] VASWANI, Ashish, SHAZEER, Noam, PARMAR, Niki, et al. Attention is all you need. Advances in neural information processing systems, 2017, vol. 30.
+
+[2] Su, J., Ahmed, M., Lu, Y., Pan, S., Bo, W., & Liu, Y. (2024). Roformer: Enhanced transformer with rotary position embedding. Neurocomputing, 568, 127063.
