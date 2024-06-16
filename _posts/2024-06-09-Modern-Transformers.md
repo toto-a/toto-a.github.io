@@ -27,18 +27,18 @@ Well this is a good question, in previous model such as LSTM, or RNN, we didn't 
 
 Indeed, however the main caracteristics of transformers, the Multi-Head Self Attention and in particular Self Attention encodes no positional information which makes it permutation invariant. 
 
+So to remedy to this problem, and introduce a notion of order, we use positional encodings. 
 
-So to remedy to this problem, and introduce a notion of structure, we use positional encodings. 
-
-Sinusoid position embeddings as described in the vanilla transformer paper [[1]](#references) :
+For Sinusoid position embeddings as described in the vanilla transformer paper [[1]](#references) :
 
 Formally they can be written as :
 
 $$ PE_{(i,2j)}= sin(\frac{i}{10000^\frac{2j}{d_{model}}}) $$
 $$ PE_{(i,2j+1)}= cos(\frac{i}{10000^\frac{2j}{d_{model}}}) $$
 
-where i is the position index and j the dimension index
+where i is the position index and j the dimension index between 0 to $$ d_{model} /2  -1 $$
 
+{% include codeHeader.html %}
 ```python
 
 class PositionEmbeddings(nn.Module) : 
@@ -60,15 +60,58 @@ class PositionEmbeddings(nn.Module) :
         self.register_buffer("PE",P)
     
     def forward(self, x : torch.tensor) :
-        B,T,D=x.shape[1]
-        out=x+(self.P[:,:T,:]).requires_grad_(False)
+        B,T,D=x.shape
+        out=x+(self.PE[:,:T,:]).requires_grad_(False)
         
         return out
 
 ```
 
+For an input sequence of len 128, we can vizualize the positions embeddings and you get the following : 
+
+![PE](/images/Transformer/PE.png)
+__Figure 2 : Positional Embeddings matrix for seq_len =128, and hidden_size = 512__
+
+You may wonder why in the first place, we use sine and cosine representations ? Well another characteristic of this positional embeddings is that is allows the model to attend to relative positions. 
+
+As stated in the paper : For any offset 
+$$k$$
+, $$ PE _{pos+k}$$
+can be represented as a linear function of 
+$$PE_{pos} $$
+
+On why do this statement hold you can look at this article [[4]](#references)
 
 
+Another nice property about this position embeddings, is that the distance between neighbor positions are symmetric. You can look at the dot product : 
+
+![Dot](/images/Transformer/DOT_product.png)
+__Figure 3 : Dot product of the sinusoid positions embeddings (same configuration as Fig 2)__
+
+You can convinve yourself, by looking at the fact that for a fixed position : 
+$$PE_{l}=[PE_{2l} , PE_{2l+1}]$$
+a matrix of size : pos*d_model  where [ ] mean the matrix filled by the positions defined above and l the dimension index.
+
+Let's denote this matrix as $$M$$
+where $$ M =\begin{bmatrix}\sin(\frac{0}{w_0}) & \cos(\frac{0}{w_1}) & \cdots & \sin(\frac{0}{w_{d_{model}}}) \\\sin(\frac{1}{w_0}) & \cos(\frac{1}{w_1}) & \cdots & \sin(\frac{1}{w_{d_{model}}})\\
+\vdots & \vdots & \ddots  & \vdots \\
+\sin(\frac{pos}{w_0}) & cos(\frac{pos}{w_1}) & \cdots & \sin(\frac{pos}{w_{d_{model}}})
+\end{bmatrix} $$
+
+Then : 
+$$ M \cdot M^T = \sum_{k=0}^{d/2 -1} m_{ik} \cdot m_{kj} $$
+
+
+
+
+{% include codeHeader.html %}
+```python
+
+
+```
+
+
+Another new positional embeddings that emerged last-year is the ROPE embeddings [[2]](#references)
 
 
 
@@ -90,7 +133,7 @@ class CausalAttention(nn.Module) :
         self.qkv=nn.Linear(config.hidden_size, config.hidden_size *3)
         self.o=nn.Linear(config.hidden_size, config.hidden_size)
 
-        self.register_buffer("mask", torch.tril(torch.ones(config.seq_len,config.seq_len)).view(1,1,))
+        self.register_buffer("mask", torch.tril(torch.ones(config.seq_len,config.seq_len)).view(1,1,config.seq_len,config.seq_len))
 
     def forward(self,x) :
 
@@ -127,7 +170,7 @@ class CausalAttentionKVCache(nn.Module):
         self.qkv=nn.Linear(config.hidden_size, config.hidden_size *3)
         self.o=nn.Linear(config.hidden_size, config.hidden_size)
 
-        self.register_buffer("mask", torch.tril(torch.ones(config.seq_len,config.seq_len)).view(1,1,))
+        self.register_buffer("mask", torch.tril(torch.ones(config.seq_len,config.seq_len)).view(1,1,config.deq_eln,config.seq_len))
         self.cache_k=None
         self.cache_v=None
 
@@ -200,9 +243,9 @@ With SILU :
 class MLP(nn.Module):
     def __init__(self, config):
         super().__init__()
-        self.w1 = nn.Linear(config.hidden_size, config.hidden_size, bias=False)
-        self.w2 = nn.Linear(config.hidden_size, config.hidden_size, bias=False)
-        self.w3 = nn.Linear(config.hidden_size, config.hidden_size, bias=False)
+        self.w1 = nn.Linear(config.hidden_size, config.k_hidden *config.hidden_size, bias=False)
+        self.w2 = nn.Linear(config.k_hidden * config.hidden_size, config.hidden_size, bias=False)
+        self.w3 = nn.Linear(config.hidden_size, config.k_hidden*config.hidden_size, bias=False)
 
     def forward(self, x) -> torch.Tensor:
         return self.w2(nn.functional.silu(self.w1(x)) * self.w3(x))
@@ -236,3 +279,5 @@ class RMSNorm(torch.nn.Module):
 [2] Su, J., Ahmed, M., Lu, Y., Pan, S., Bo, W., & Liu, Y. (2024). Roformer: Enhanced transformer with rotary position embedding. Neurocomputing, 568, 127063.
 
 [3] Wang, Y. A., & Chen, Y. N. (2020). What do position embeddings learn? an empirical study of pre-trained language model positional encoding. arXiv preprint arXiv:2010.04903.
+
+[4] https://blog.timodenk.com/linear-relationships-in-the-transformers-positional-encoding/
