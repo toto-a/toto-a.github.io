@@ -9,7 +9,7 @@ header-includes:
 figureTemplate: '*$$figureTitle$$ $$i$$*$$titleDelim$$ $$t$$'
 --- 
 
-In this blog post, I will try to explain and show with code the basis of modern transformers (relative postion, absolute, learnt embeddings, rms norm, rope, kv cache, and more ..).
+In this blog post, I will try to explain and show with code the basis of modern transformers (relative postion, absolute, learnt embeddings, rms norm, rope, kv cache, and more ).
 
 ## Transformers Introduction 
 
@@ -20,16 +20,29 @@ An example of the architecture of an transformer :
  _Figure 1 : Transformer (Decoder only) architecture_
 
 ## Embeddings
-For position emebdings, there are different type : absolute, relative and sinusoid.
+For position emebdings, there are different type : absolute, relative. (in the sense of update)
 
 But first, why do we even need position embedding in transformer ?
 Well this is a good question, in previous model such as LSTM, or RNN, we didn't have such consideration. 
 
-Indeed, however the main caracteristics of transformers, the Multi-Head Self Attention and in particular Self Attention encodes no positional information which makes it permutation invariant. 
+Indeed, however the main caracteristics of transformers, the Multi-Head Self Attention and in particular Self Attention is that it encodes no positional information which makes it permutation invariant. 
+
+For example, you can see self attention as a graph where every node is connected to each other, in contrast to LSTM/RNN.
+
+This idea is show below :
+<div style="display: flex; justify-content: space-between;">
+    <img src="/images/Transformer/sa.png" alt="Self Attention" style="width: 45%; display: inline-block; margin-right: 10px;">
+    <img src="/images/Transformer/RNN.png" alt="Image 2" style="width: 45%; display: inline-block;">
+</div>
+
+
 
 So to remedy to this problem, and introduce a notion of order, we use positional encodings. 
 
-For Sinusoid position embeddings as described in the vanilla transformer paper [[1]](#references) :
+### Absolute 
+
+#### 1. <ins>Sinusoid</ins>
+For absolute position, the most known is the Sinusoid position embeddings as described in the vanilla transformer paper [[1]](#references) :
 
 Formally they can be written as :
 
@@ -82,10 +95,10 @@ $$PE_{pos} $$
 
 On why do this statement hold you can look at this article [[4]](#references)
 
-
 Another nice property about this position embeddings, is that the distance between neighbor positions are symmetric. You can look at the dot product : 
 
 ![Dot](/images/Transformer/DOT_product.png)
+
 __Figure 3 : Dot product of the sinusoid positions embeddings (same configuration as Fig 2)__
 
 You can convinve yourself, by looking at the fact that for a fixed position : 
@@ -93,31 +106,72 @@ $$PE_{l}=[PE_{2l} , PE_{2l+1}]$$
 a matrix of size : pos*d_model  where [ ] mean the matrix filled by the positions defined above and l the dimension index.
 
 Let's denote this matrix as $$M$$
-where $$ M =\begin{bmatrix}\sin(\frac{0}{w_0}) & \cos(\frac{0}{w_1}) & \cdots & \sin(\frac{0}{w_{d_{model}}}) \\\sin(\frac{1}{w_0}) & \cos(\frac{1}{w_1}) & \cdots & \sin(\frac{1}{w_{d_{model}}})\\
+where $$ M =\begin{bmatrix}\sin(\frac{0}{w_0}) & \cos(\frac{0}{w_1}) & \cdots & \sin(\frac{0}{w_{d_{model}-1}}) \\\sin(\frac{1}{w_0}) & \cos(\frac{1}{w_1}) & \cdots & \sin(\frac{1}{w_{d_{model}}-1})\\
 \vdots & \vdots & \ddots  & \vdots \\
-\sin(\frac{pos}{w_0}) & cos(\frac{pos}{w_1}) & \cdots & \sin(\frac{pos}{w_{d_{model}}})
+\sin(\frac{pos}{w_0}) & cos(\frac{pos}{w_1}) & \cdots & \sin(\frac{pos}{w_{d_{model}}-1})
 \end{bmatrix} $$
 
+where $$w_k = 10000^\frac{k}{d_model}$$ 
+,with $$ k \in [0,d_{model}-1] $$
+
 Then : 
-$$ M \cdot M^T = \sum_{k=0}^{d/2 -1} m_{ik} \cdot m_{kj} $$
+$$ \begin{align}
+M \cdot M^T &= \sum_{k=0}^{d-1} m_{ik} \cdot m_{jk} \\
+&=\sum_{k=0}^{d-1} \big( \sin(\frac{i}{w_{k}}) \cdot \sin(\frac{j}{w_k}) + \cos(\frac{i}{w_k}) \cdot \cos(\frac{j}{w_k}) \big) \\
+&=\sum_{k=0}^{d-1} \cos(\frac{i-j}{w_k})
+\end{align}$$ 
 
+#### 2. <ins>Learnt</ins>
 
-
+Now for absolute learnt position embeddings, as used by the original GPT2 model[[5]](#references).
 
 {% include codeHeader.html %}
-```python
+```python 
+class GPTEmbeddings(nn.Module) :
+    def __init__(self, config) :
+        super().__init__()
 
+        self.pe=nn.Embedding(config.hidden_size, config.hidden_size).view(1,1,config.hidden_size,config.hidden_size)
+    
+    def forward(self, x: torch.tensor) :
+
+        B,T,D=x.shape
+        out=x + self.pe[:,:,:T,:T](x)
+        return out 
 
 ```
 
 
-Another new positional embeddings that emerged last-year is the ROPE embeddings [[2]](#references)
+### Relative 
+
+While absolute embeddings works well, they don't give us information about relative position. Meaning that, for the transformer position 1 and 2 looks the same as the position 5 and 50.
+
+Also another problem is their inability to scale well. For sequence longuer than those encountered during training, it cannot generalize effectively because these unseen positions are not learned [[6,7]](#references).
+
+So in general for relative embeddings: 
+
+- The attention calculation become $$ \alpha_{ij} = \dfrac{x_iW^Q  \cdot (x_jW^K + p_{ij}) }{\sqrt d} $$
+where $$ p_{ij} $$ is the relative position 
 
 
+#### 1. _ROPE_
+
+ROPE, or rotary positional embeddings as first described in this paper [[2]](#references). Instead of addding a positional embedding to the token embedding, 
+this method introduces an angle $$\theta$$ that applies a rotation to the embeddings.
+
+This idea is better illustrated with the Figure below :
+![ROPE](/images/Transformer/RoPE.png)
+__Figure 5 : RoPE (image source : [[3]](#references))__
 
 
+This method is most notably used by well known model like Llama (2 and 3), Mistral [[8,9]](#references)
 
 ## Attention 
+
+
+
+
+Below you will find the classical attention implementation in the case of absolute embeddings 
 
 Without KV cache : 
 
@@ -156,8 +210,22 @@ class CausalAttention(nn.Module) :
 ````
 With KV cache :
 
-![KV cache](/images/Transformer/KV.gif)
+What is even KV cache and how does it helps us speed up inference ?.
 
+During inference, especially for autoregressive generation, the model generates tokens one by one. In each step, it needs to recompute the attention for the entire sequence up to the current token.
+
+To avoid redundant computations, the model caches the keys and values from previous steps. This means that in each new step, it only computes the keys and values for the new token, and reuses the cached keys and values for all preceding tokens.
+
+As illustrated by the gif below : 
+
+![KV cache](/images/Transformer/KV.gif)
+__Figure 4 : KV cache__
+
+
+You have the cache creation implemented below with the function 
+_get_cache()_ and in the forward pass in the update cache. 
+
+{% include codeHeader.html %}
 ```python
 class CausalAttentionKVCache(nn.Module):
     def __init__(self, config) -> None:
@@ -281,3 +349,13 @@ class RMSNorm(torch.nn.Module):
 [3] Wang, Y. A., & Chen, Y. N. (2020). What do position embeddings learn? an empirical study of pre-trained language model positional encoding. arXiv preprint arXiv:2010.04903.
 
 [4] https://blog.timodenk.com/linear-relationships-in-the-transformers-positional-encoding/
+
+[5] Radford, A., Wu, J., Child, R., Luan, D., Amodei, D., & Sutskever, I. (2019). Language models are unsupervised multitask learners. OpenAI blog, 1(8), 9. 
+
+[6] Shaw, P., Uszkoreit, J., & Vaswani, A. (2018). Self-attention with relative position representations. arXiv preprint arXiv:1803.02155.
+
+[7] Press, O., Smith, N. A., & Lewis, M. (2021). Train short, test long: Attention with linear biases enables input length extrapolation. arXiv preprint arXiv:2108.12409.
+
+[8] Touvron, H., Martin, L., Stone, K., Albert, P., Almahairi, A., Babaei, Y., ... & Scialom, T. (2023). Llama 2: Open foundation and fine-tuned chat models. arXiv preprint arXiv:2307.09288.
+
+[9] Jiang, A. Q., Sablayrolles, A., Mensch, A., Bamford, C., Chaplot, D. S., Casas, D. D. L., ... & Sayed, W. E. (2023). Mistral 7B. arXiv preprint arXiv:2310.06825.
