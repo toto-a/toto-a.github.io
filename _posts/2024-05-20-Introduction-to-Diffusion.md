@@ -411,7 +411,7 @@ Finally we obtain for our ELBO :
 
 $$ \boxed{ELBO(x) = \underbrace{\mathbb{E_{q_{\phi}(x_{1}  |   x_0)} } \Big[ \log \ p_{\theta}(x_0|x_1)\Big]}_\text{Reconstruction term} -
 \underbrace{\mathbb{E_{q_{\phi}(x_{T-1} |   x_0)} }\Big[ \ {\mathbb{D_{KL}} \Big[  {q_{\phi}(x_T|x_{T-1})} \ || \ p_{\theta}(x_T) \ \Big]}\Big]}_\text{Prior Matching} +
-\underbrace{\sum_{t=1}^{t-1}\mathbb{E_{q_{\phi}(x_{t-1},x_{t+1}  |   x_0)} } \Big[ \ \mathbb{D_{KL}} \Big[ \   q_{\phi}(x_t|x_{t-1}) || p_{\theta} (x_{t}|x_{t+1}) \ \Big] \ \Big]} _\text{Consitency Term}}$$
+\underbrace{\sum_{t=1}^{T-1}\mathbb{E_{q_{\phi}(x_{t-1},x_{t+1}  |   x_0)} } \Big[ \ \mathbb{D_{KL}} \Big[ \   q_{\phi}(x_t|x_{t-1}) || p_{\theta} (x_{t}|x_{t+1}) \ \Big] \ \Big]} _\text{Consitency Term}}$$
 
 * The Reconstruction term can be interpreted the same way as in the vanilla VAE. We measure how good our neural network can recover 
 $$x_0$$ 
@@ -438,7 +438,17 @@ to draw the current sample
 $$x_t$$ 
 which may seem a little odd, and also because the two distributions are moving in opposite direction. 
 
+The ELBO term above that we found, can be computed without any problem. However, it might be suboptimal, because the consitency term is computed as an expectation of two random variables  : $$ {x_{t-1},x_t} $$
+and also because we sum over $$ T-1 $$ term, over large T the ELBO might have a high variance. 
+
+
 Let us try remedy all of this : 
+
+By Baye's Rule we know we can express our opposing flow : 
+$$ q_{\phi}(x_{t}|x_{t-1},x_0)= \frac{q_{\phi}(x_{t-1}|x_t,x_0) q_{\phi}(x_t|x_0)}{q_{\phi}(x_{t-1}|x_0)}  $$
+
+
+Now let us rederive our ELBO.
 
 
 
