@@ -355,22 +355,22 @@ The coefficients are chosen such that the variance of the latent variables stays
 >, for any 
 > $$\alpha \in \left[ 0,1\right]$$
 >then 
->$$ b= 1-\alpha$$
+>$$ b= \sqrt{1-\alpha}$$
 >.
 >
 >Finally we can write  : 
-> $$x_t=\sqrt \alpha_t x_{t-1} + (1-\alpha_t)\epsilon_{t-1}$$
+> $$x_t=\sqrt \alpha_t x_{t-1} + \sqrt{1-\alpha_t}\epsilon_{t-1}$$
 
 
 ### *ELBO*
 
-Before looking at the ELBO for our case, let's rewrite some things that will be useful later. 
+Before deriving the ELBO for our case, to make the process more tractable let's impose a Markovian structure (memoryless) where: 
 
-$$ q_{\phi} (x_{1:t}|x_0)= \prod_{t=1}^T q_{\phi}(x_t|x_{t-1}) $$
+$$ q_{\phi} (x_{0:T}|x_0)= q(x_0) \prod_{t=1}^T q_{\phi}(x_t|x_{t-1}) $$
 
-$$ p_{\theta} (x_{0:t}) = p_{\theta}(x_T) \prod_{t=1}^{T} p_{\theta} (x_{t-1}|x_t) $$
+$$ p_{\theta} (x_{0:T}) = p_{\theta}(x_T) \prod_{t=1}^{T} p_{\theta} (x_{t-1}|x_t) $$
 
-For the ELBO, we will follow the same steps as we did for the VAE, with very small differences.
+For the ELBO, we will follow the same steps as we did for the VAE, with very few differences.
 $$ $$
 
 $$\begin{align}
@@ -379,7 +379,7 @@ $$\begin{align}
 &\geq  \mathbb{E_{q_{\phi}(x_{1:T}  |   x_0)} } \Big[\log \ \frac{p_{\theta}(x_{0:t}) }{q_{\phi}(x_{1:t}|x_0)} \ \Big] \\
 \end{align}$$
 
-With the things defined befor we can further simplify the above expression to obtain that : 
+With the things defined before we can further simplify the above expression to obtain that : 
 
 $$\begin{align}
 \log p_{\theta}(x_{0:t})
@@ -409,9 +409,15 @@ $$\\$$
 
 Finally we obtain for our ELBO : 
 
-$$ \boxed{ELBO(x) = \underbrace{\mathbb{E_{q_{\phi}(x_{1}  |   x_0)} } \Big[ \log \ p_{\theta}(x_0|x_1)\Big]}_\text{Reconstruction term} -
-\underbrace{\mathbb{E_{q_{\phi}(x_{T-1} |   x_0)} }\Big[ \ {\mathbb{D_{KL}} \Big[  {q_{\phi}(x_T|x_{T-1})} \ || \ p_{\theta}(x_T) \ \Big]}\Big]}_\text{Prior Matching} +
-\underbrace{\sum_{t=1}^{T-1}\mathbb{E_{q_{\phi}(x_{t-1},x_{t+1}  |   x_0)} } \Big[ \ \mathbb{D_{KL}} \Big[ \   q_{\phi}(x_t|x_{t-1}) || p_{\theta} (x_{t}|x_{t+1}) \ \Big] \ \Big]} _\text{Consitency Term}}$$
+$$
+\begin{align}
+
+\boxed{ELBO(x) = \underbrace{\mathbb{E_{q_{\phi}(x_{1}  |   x_0)} } \Big[ \log \ p_{\theta}(x_0|x_1)\Big]}_\textbf{Reconstruction term} -
+\underbrace{\mathbb{E_{q_{\phi}(x_{T-1} |   x_0)} }\Big[ \ {\mathbb{D_{KL}} \Big[  {q_{\phi}(x_T|x_{T-1})} \ || \ p_{\theta}(x_T) \ \Big]}\Big]}_\textbf{Prior Matching} +
+\underbrace{\sum_{t=1}^{T-1}\mathbb{E_{q_{\phi}(x_{t-1},x_{t+1}  |   x_0)} } \Big[ \ \mathbb{D_{KL}} \Big[ \   q_{\phi}(x_t|x_{t-1}) || p_{\theta} (x_{t}|x_{t+1}) \ \Big] \ \Big]} _\textbf{Consitency Term}}
+
+\end{align}
+$$
 
 * The Reconstruction term can be interpreted the same way as in the vanilla VAE. We measure how good our neural network can recover 
 $$x_0$$ 
@@ -442,21 +448,92 @@ The ELBO term above that we found, can be computed without any problem. However,
 and also because we sum over $$ T-1 $$ term, over large T the ELBO might have a high variance. 
 
 
-Let us try remedy all of this : 
+Let us try to resolve all of this : 
 
 By Baye's Rule we know we can express our opposing flow : 
-$$ q_{\phi}(x_{t}|x_{t-1},x_0)= \frac{q_{\phi}(x_{t-1}|x_t,x_0) q_{\phi}(x_t|x_0)}{q_{\phi}(x_{t-1}|x_0)}  $$
+$$ 
+\begin{equation}
+q_{\phi}(x_{t}|x_{t-1},x_0)= \frac{q_{\phi}(x_{t-1}|x_t,x_0) q_{\phi}(x_t|x_0)}{q_{\phi}(x_{t-1}|x_0)}
+\end{equation}
+$$
 
 
-Now let us rederive our ELBO.
+Now let us rederive to obtain our new ELBO.
 
 
+$$
+\begin{align}
+
+log p_{\theta}(x_{0:t}) &\geq  \mathbb{E_{q_{\phi}(x_{1:T}  |   x_0)} } \Big[\log \ \frac{p_{\theta}(x_{0:t}) }{q_{\phi}(x_{1:t}|x_0)} \ \Big] \\
+&=\mathbb{E_{q_{\phi}(x_{1:T}  |   x_0)} } \Big[\log \ \frac{p_{\theta}(x_T) \prod_{t=1}^{T} p_{\theta} (x_{t-1}|x_t) }{\prod_{t=1}^T q_{\phi}(x_t|x_{t-1})}\ \Big] \\
+&=\mathbb{E_{q_{\phi}(x_{1:T}  |   x_0)} } \Big[\log \ \frac{p_{\theta}(x_T)  p_{\theta}(x_0|x_1) \prod_{t=2}^{T} p_{\theta} (x_{t-1}|x_t) }{ q_{\phi}(x_1|x_{0}) \prod_{t=2}^T q_{\phi}(x_t|x_{t-1})}\ \Big] \\
+
+&=\mathbb{E_{q_{\phi}(x_{1:T}  |   x_0)} } \Big[\log \ \frac{p_{\theta}(x_T) p_{\theta}(x_0|x_1) \prod_{t=2}^{T} p_{\theta} (x_{t-1}|x_t) }{ q_{\phi}(x_1|x_{0}) \prod_{t=2}^T \frac{q_{\phi}(x_{t-1}|x_t,x_0) q_{\phi}(x_t|x_0)}{q_{\phi}(x_{t-1}|x_0)} } \ \Big] \\
+
+&=\mathbb{E_{q_{\phi}(x_{1:T}  |   x_0)} } \Big[\log \ \frac{p_{\theta}(x_T) p_{\theta}(x_0|x_1)}{ q_{\phi}(x_1|x_{0})}  + \prod_{t=2}^{T}  \log \ \frac{p_{\theta} (x_{t-1}|x_t) }{ \frac{q_{\phi}(x_{t-1}|x_t,x_0) q_{\phi}(x_t|x_0)}{q_{\phi}(x_{t-1}|x_0)} } \ \Big] 
 
 
+\end{align}
+$$
+
+Let's consider the second term : 
+
+$$
+\begin{align}
+
+\prod_{t=2}^{T}  \Big[\log \ \frac{p_{\theta} (x_{t-1}|x_t) }{ \frac{q_{\phi}(x_{t-1}|x_t,x_0) q_{\phi}(x_t|x_0)}{q_{\phi}(x_{t-1}|x_0)} } \ \Big] 
+&=\prod_{t=2}^{T}  \Big[\log \ \frac{p_{\theta} (x_{t-1}|x_t) }{ \frac{q_{\phi}(x_{t-1}|x_t,x_0) q_{\phi}(x_t|x_0)}{q_{\phi}(x_{t-1}|x_0)} } \ \Big] \\
+&=\prod_{t=2}^{T}  \Big[\log \ \frac{p_{\theta} (x_{t-1}|x_t) }{q_{\phi}(x_{t-1}|x_t,x_0) }  \cdot \prod_{t=2}^{T}  \frac {q_{\phi}(x_{t-1}|x_0)}{ q_{\phi}(x_t|x_0)} \Big] \\
+&=\prod_{t=2}^{T}  \Big[\log \ \frac{p_{\theta} (x_{t-1}|x_t) }{q_{\phi}(x_{t-1}|x_t,x_0) }  \cdot \frac {q_{\phi}(x_{1}|x_0)}{ q_{\phi}(x_T|x_0)} \Big ]
+
+\end{align}
+$$
 
 
+Then going back to equation $$(32)$$, 
+by cancelling $$q_{\phi}(x_1|x_0)$$
+ we can see that : 
 
 
+$$
+\begin{aligned}
+
+\mathbb{E_{q_{\phi}(x_{1:T}  |   x_0)} } \Big[\log \ \frac{p_{\theta}(x_T) p_{\theta}(x_0|x_1)}{ q_{\phi}(x_1|x_{0})} \Big] + \prod_{t=2}^{T}  \Big[\log \ \frac{p_{\theta} (x_{t-1}|x_t) }{ \frac{q_{\phi}(x_{t-1}|x_t,x_0) q_{\phi}(x_t|x_0)}{q_{\phi}(x_{t-1}|x_0)} } \ \Big] 
+
+&=\mathbb{E_{q_{\phi}(x_{1:T}  |   x_0)} }  \Big[ \ \log \frac{p_{\theta}(x_T)}{ q_{\phi}(x_T|x_{0})} +   \log \ p_{\theta}(x_0|x_1) -
+ 
+\sum_{t=2}^{T} \log  \frac{q_{\phi}(x_{t-1}|x_t,x_0)}{ p_{\theta} (x_{t-1}|x_{t})} 
+
+\Big] \\
+
+&=\mathbb{E_{q_{\phi}(x_{T}  |   x_0)} }  \Big[ \log \ \frac{p_{\theta}(x_T)}{ q_{\phi}(x_T|x_{0})} \Big] + \mathbb{E_{q_{\phi}(x_{1}  |   x_0)} } \Big[\log \ p_{\theta}(x_0|x_1) \Big] + \mathbb{E_{q_{\phi}(x_{1}  |   x_0)} } \Big[\log \frac{q_{\phi}(x_{t-1}|x_t, x_0)}{ p_{\theta} (x_{t-1}|x_{t})}      \Big] \\
+&= \underbrace{\mathbb{E_{q_{\phi}(x_{1}  |   x_0)} } \Big[\log \ p_{\theta}(x_0|x_1) \Big]}_\textbf{Reconstruction term} - \underbrace{\mathbb{D_{KL}} \Big[ \   q_{\phi}(x_T|x_{0}) || p_{\theta} (x_{T}) \Big]}_\textbf{Prior Matching} -
+
+\underbrace {\mathbb{D_{KL}} \Big[ \   q_{\phi}(x_{t-1}|x_{t},x_0) || p_{\theta} (x_{t-1}|x_t) \Big]}_\textbf{Consistency term}
+
+\end{aligned} 
+$$
+
+$$ \\[5pt]$$
+
+* For the **Reconstruction term**, it can be interpretated in the same manner as before.
+* The **Prior matching term**, can be seen as estimate of how close the final noisified distribution is to our gaussian prior.
+* The new **Consistency term**, contrary to before where we asked a forward transition to match with the reverse transition. Now, we use our $$q_{\phi}$$ to construct a reverse transition and match it with
+$$p_{\theta}$$
+
+##  Reverse process 
+
+Now that we've derived the new Evidence Lower Bound (ELBO) for our variational diffusion model, let's focus on its essential component: $$ q_\phi(x_{t-1}|x_t, x_0) $$ 
+. Our key objective is to demonstrate:
+
+ * This distribution is Gaussian
+ * We can compute its mean and variance in closed form
+
+
+Since we already know that $$q_{\phi} (x_{t-1}|x_t , x_0) = q_{\phi (x_t|x_{t-1})} = \mathcal{N}(x_t|\sqrt{\alpha_t} x_{t-1}, (1-\alpha_t)\mathbf{I}) $$ and via our reparametrization trick drawing samples $$ x_t \sim q_{\phi}(x_t|x_{t-1}) $$ 
+can be rewritten as  :
+
+$$ x_t=\sqrt{\alpha_t} x_{t-1} + \sqrt{1 - \alpha_t} \epsilon $$
 
 
 
