@@ -506,10 +506,10 @@ $$
 
 \Big] \\
 
-&=\mathbb{E_{q_{\phi}(x_{T}  |   x_0)} }  \Big[ \log \ \frac{p_{\theta}(x_T)}{ q_{\phi}(x_T|x_{0})} \Big] + \mathbb{E_{q_{\phi}(x_{1}  |   x_0)} } \Big[\log \ p_{\theta}(x_0|x_1) \Big] + \mathbb{E_{q_{\phi}(x_{1}  |   x_0)} } \Big[\log \frac{q_{\phi}(x_{t-1}|x_t, x_0)}{ p_{\theta} (x_{t-1}|x_{t})}      \Big] \\
+&=\mathbb{E_{q_{\phi}(x_{T}  |   x_0)} }  \Big[ \log \ \frac{p_{\theta}(x_T)}{ q_{\phi}(x_T|x_{0})} \Big] + \mathbb{E_{q_{\phi}(x_{1}  |   x_0)} } \Big[\log \ p_{\theta}(x_0|x_1) \Big] - \sum_{t=2}^{T} \mathbb{E_{q_{\phi}(x_{1}  |   x_0)} } \Big[\log \frac{q_{\phi}(x_{t-1}|x_t, x_0)}{ p_{\theta} (x_{t-1}|x_{t})}      \Big] \\
 &= \underbrace{\mathbb{E_{q_{\phi}(x_{1}  |   x_0)} } \Big[\log \ p_{\theta}(x_0|x_1) \Big]}_\textbf{Reconstruction term} - \underbrace{\mathbb{D_{KL}} \Big[ \   q_{\phi}(x_T|x_{0}) || p_{\theta} (x_{T}) \Big]}_\textbf{Prior Matching} -
 
-\underbrace {\mathbb{D_{KL}} \Big[ \   q_{\phi}(x_{t-1}|x_{t},x_0) || p_{\theta} (x_{t-1}|x_t) \Big]}_\textbf{Consistency term}
+ \underbrace {\sum_{t=2}^{T} \mathbb{D_{KL}} \Big[ \   q_{\phi}(x_{t-1}|x_{t},x_0) || p_{\theta} (x_{t-1}|x_t) \Big]}_\textbf{Consistency term}
 
 \end{aligned} 
 $$
@@ -530,12 +530,112 @@ Now that we've derived the new Evidence Lower Bound (ELBO) for our variational d
  * We can compute its mean and variance in closed form
 
 
-Since we already know that $$q_{\phi} (x_{t-1}|x_t , x_0) = q_{\phi (x_t|x_{t-1})} = \mathcal{N}(x_t|\sqrt{\alpha_t} x_{t-1}, (1-\alpha_t)\mathbf{I}) $$ and via our reparametrization trick drawing samples $$ x_t \sim q_{\phi}(x_t|x_{t-1}) $$ 
+Since we already know that $$q_{\phi} (x_{t-1}|x_t , x_0)  = \mathcal{N}(x_t|\sqrt{\alpha_t} x_{t-1}, (1-\alpha_t)\mathbf{I}) $$ and via our reparametrization trick drawing samples $$ x_t \sim q_{\phi}(x_t|x_{t-1}) $$ 
 can be rewritten as  :
 
-$$ x_t=\sqrt{\alpha_t} x_{t-1} + \sqrt{1 - \alpha_t} \epsilon $$
+$$
+\begin{align}
+ x_t&=\sqrt{\alpha_t} x_{t-1} + \sqrt{1 - \alpha_t} \epsilon_{t-1} \\
+   &=\sqrt{\alpha_t \cdot \alpha_{t-1}} \cdot x_{t-2} + \sqrt{1-\alpha_t} \cdot \epsilon_{t-1}
+      + \sqrt{\alpha_t \cdot (1-\alpha_{t-1})} \cdot \epsilon_{t-2} \\
+   &=\sqrt{\alpha_t \cdot \alpha_{t-1}} \cdot x_{t-2} + \sqrt{1-\alpha_t \cdot \alpha_{t-1} } \epsilon_{t-2} \\
+   &=.... \\
+   &= \sqrt{\prod_{i=1}^{T} \alpha_i} x_0 +\sqrt{1 - \prod_{i=1}^{T}\alpha_i} \epsilon_0 \\
+   &=\sqrt{\overline {\alpha}_t} x_0 +\sqrt{ 1 - \overline {\alpha}_t} \epsilon_0\
+ \end{align}
+$$
 
 
+
+The transition between line 2 and line 3 of the equation is achieved through the fact that the sum of two independant Gaussian, remains a Gaussian, with mean being the sum of the two means and the variance being the sum of the two variances. 
+
+
+To obtain the form of $$q_{\phi}(x_{t-1}|x_t)$$
+, using Bayes Theorem. With what we obatined earlier 
+($$x_t$$) 
+in closed form, It can be determined that :
+
+$$ 
+\begin{align}
+q_{\phi}(x_{t-1}|x_{t},x_0)&= \frac{q_{\phi}(x_{t}|x_{t-1},x_0) q_{\phi}(x_{t-1}|x_0)}{q_{\phi}(x_{t}|x_0)} \\
+&=\frac{\mathcal{N}(x_{t}|\sqrt{\alpha_t} x_{t-1}, (1-\alpha_t)\mathbf{I}) \mathcal{N}(x_{t-1}|\sqrt{\overline{ \alpha}_{t-1}} x_{0}, (1-\overline{\alpha}_{t-1})\mathbf{I})} {\mathcal{N}(x_t|\sqrt{ \overline{\alpha}_t} x_{0}, (1-\overline{\alpha}_t)\mathbf{I})} \\
+
+&\propto \exp\left[
+    \frac{(x_t - \sqrt{\alpha_t}x_{t-1})^2}{2(1 - \alpha_t)} 
+    + \frac{(x_{t-1} - \sqrt{\overline {\alpha}_{t-1}}x_0)^2}{2(1 - \overline{\alpha}_{t-1})} 
+    - \frac{(x_t - \sqrt{\overline{\alpha}_t}x_0)^2}{2(1 - \overline{\alpha}_t)}
+\right]
+
+\end{align}
+$$
+
+From this point, there are two main approaches to determine the mean and variance:  
+
+* Continue expanding the expression until it simplifies into a resulting Gaussian form.  
+* Identify the expression inside the exponential function as a quadratic expression. The mean and variance of the resulting Gaussian can then be determined as the minimum of this quadratic function and its derivative, respectively.
+
+After all, we obtain that 
+$$q_{\phi}(x_{t-1}|x_t)$$ 
+takes the form : 
+$$ 
+\mathcal{N}(x_{t-1} | \mu_q(x_t,x_0),\Sigma_q(t) \mathbf{I}) 
+\\
+$$ 
+
+$$\\$$
+where
+
+$$
+\\
+\mu_q(x_t, x_0) = \frac{(1 - \overline{\alpha}_{t-1})\sqrt{\overline{\alpha}_t}}{1 - \alpha_t}x_t 
++ \frac{(1 - \alpha_t)\sqrt{\overline{\alpha}_{t-1}}}{1 - \overline{\alpha}_t}x_0
+$$
+
+$$
+\Sigma_q(t) = \frac{(1 - \alpha_t)(1 - \sqrt{\overline{\alpha}_{t-1}})}{1 - \overline{\alpha}_t} I 
+
+
+$$
+
+
+A pertinent observation would be to see that, we obtained an expression of
+$$q_{\phi}(x_{t-1}|x_t) $$ 
+, which only depends on 
+$$ x_t $$ 
+and 
+$$ x_0 $$
+. This implies that there is no "learning" involved for 
+$$ q $$
+, and no neural network is required to be trained.
+
+Remembering our consistency term from our ELBO : 
+$$\underbrace {\sum_{t=2}^{T} \mathbb{D_{KL}} \Big[ \   q_{\phi}(x_{t-1}|x_{t},x_0) || p_{\theta} (x_{t-1}|x_t) \Big]}_\textbf{Consistency term}$$
+
+In order to match $$p_{\theta}(x_{t-1}|x_t)$$ to our gaussian distribution 
+$$q_{\phi}(x_{t-1} | x_t) $$
+we can model it as a Gaussian with matching mean and variance : 
+
+$$ 
+p_\theta(x_{t-1} \mid x_t) = \mathcal{N}\left( x_{t-1} \mid \mu_\theta(x_t), \sigma_q^2(t) I \right)
+$$ 
+
+The mean can be determined via a neural network, and for the variance we choose it to be identical to our true posterior : 
+$$q_{\phi}(x_{t-1} | x_t) $$
+We only need to learn the mean 
+$$\mu_\theta$$ 
+our neural network 
+
+
+Therefore, the KL divergence is simplified to : 
+$$
+\begin{align}
+\mathbb{D_{KL}} \Big[ \   q_{\phi}(x_{t-1}|x_{t},x_0) || p_{\theta} (x_{t-1}|x_t) \Big]
+& = \mathbb{D_{KL}}\left( \
+\mathcal{N}(x_{t-1} | \mu_q(x_t,x_0),\Sigma_q(t) \mathbf{I} ) \ || \ \mathcal{N}\left( x_{t-1} \mid \mu_\theta(x_t), \sigma_q^2(t) I \right) \
+\right) \\
+&= \frac{1}{2 \sigma_q^2} \left[ \| \mu_\theta - \mu_q \|^2 \right]
+\end{align}
+$$
 
 
 ## References 
