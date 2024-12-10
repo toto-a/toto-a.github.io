@@ -412,7 +412,7 @@ Finally we obtain for our ELBO :
 $$
 \begin{align}
 
-\boxed{ELBO(x) = \underbrace{\mathbb{E_{q_{\phi}(x_{1}  |   x_0)} } \Big[ \log \ p_{\theta}(x_0|x_1)\Big]}_\textbf{Reconstruction term} -
+\boxed{ELBO_{\phi,\theta}(x) = \underbrace{\mathbb{E_{q_{\phi}(x_{1}  |   x_0)} } \Big[ \log \ p_{\theta}(x_0|x_1)\Big]}_\textbf{Reconstruction term} -
 \underbrace{\mathbb{E_{q_{\phi}(x_{T-1} |   x_0)} }\Big[ \ {\mathbb{D_{KL}} \Big[  {q_{\phi}(x_T|x_{T-1})} \ || \ p_{\theta}(x_T) \ \Big]}\Big]}_\textbf{Prior Matching} +
 \underbrace{\sum_{t=1}^{T-1}\mathbb{E_{q_{\phi}(x_{t-1},x_{t+1}  |   x_0)} } \Big[ \ \mathbb{D_{KL}} \Big[ \   q_{\phi}(x_t|x_{t-1}) || p_{\theta} (x_{t}|x_{t+1}) \ \Big] \ \Big]} _\textbf{Consitency Term}}
 
@@ -506,10 +506,11 @@ $$
 
 \Big] \\
 
-&=\mathbb{E_{q_{\phi}(x_{T}  |   x_0)} }  \Big[ \log \ \frac{p_{\theta}(x_T)}{ q_{\phi}(x_T|x_{0})} \Big] + \mathbb{E_{q_{\phi}(x_{1}  |   x_0)} } \Big[\log \ p_{\theta}(x_0|x_1) \Big] - \sum_{t=2}^{T} \mathbb{E_{q_{\phi}(x_{1}  |   x_0)} } \Big[\log \frac{q_{\phi}(x_{t-1}|x_t, x_0)}{ p_{\theta} (x_{t-1}|x_{t})}      \Big] \\
+&=\mathbb{E_{q_{\phi}(x_{T}  |   x_0)} }  \Big[ \log \ \frac{p_{\theta}(x_T)}{ q_{\phi}(x_T|x_{0})} \Big] + \mathbb{E_{q_{\phi}(x_{1}  |   x_0)} } \Big[\log \ p_{\theta}(x_0|x_1) \Big] - \sum_{t=2}^{T} \mathbb{E_{q_{\phi}(x_{t},x_{t-1}  |   x_0)} } \Big[\log \frac{q_{\phi}(x_{t-1}|x_t, x_0)}{ p_{\theta} (x_{t-1}|x_{t})}      \Big] \\
+
 &= \underbrace{\mathbb{E_{q_{\phi}(x_{1}  |   x_0)} } \Big[\log \ p_{\theta}(x_0|x_1) \Big]}_\textbf{Reconstruction term} - \underbrace{\mathbb{D_{KL}} \Big[ \   q_{\phi}(x_T|x_{0}) || p_{\theta} (x_{T}) \Big]}_\textbf{Prior Matching} -
 
- \underbrace {\sum_{t=2}^{T} \mathbb{D_{KL}} \Big[ \   q_{\phi}(x_{t-1}|x_{t},x_0) || p_{\theta} (x_{t-1}|x_t) \Big]}_\textbf{Consistency term}
+ \underbrace {\sum_{t=2}^{T}\mathbb{E_{q_{\phi}(x_{t}  |   x_0)} } \mathbb{D_{KL}} \Big[ \   q_{\phi}(x_{t-1}|x_{t},x_0) || p_{\theta} (x_{t-1}|x_t) \Big]}_\textbf{Consistency term}
 
 \end{aligned} 
 $$
@@ -636,6 +637,60 @@ $$
 &= \frac{1}{2 \sigma_q^2} \left[ \| \mu_\theta - \mu_q \|^2 \right]
 \end{align}
 $$
+
+
+## Training and Inference 
+
+Given our simplified KL divergence, we want to optimize 
+$$ \mu_\theta$$ 
+to match 
+$$ \mu_q $$
+In other words, we choose 
+$$ \mu_\theta $$ 
+to be in form 
+
+$$
+\mu_\theta(x_t) = \frac{(1 - \overline{\alpha}_{t-1})\sqrt{\overline{\alpha}_t}}{1 - \alpha_t}x_t 
++ \frac{(1 - \alpha_t)\sqrt{\overline{\alpha}_{t-1}}}{1 - \overline{\alpha}_t} \hat{x}_\theta(x_t)
+$$
+
+
+Then our simplified KL divergence, further simplify to  :
+$$
+\begin{align}
+\frac{1}{2 \sigma_q^2} \left[ \| \mu_\theta - \mu_q \|^2 \right]
+
+&=\frac{1}{2 \sigma_q^2} \left[
+   
+\left | \left| \frac{(1 - \alpha_t)\sqrt{\overline{\alpha}_{t-1}}}{1 - \overline{\alpha}_t} *(\hat{x}_\theta(x_t) - x_0 )
+\right| \right|^2
+
+\right] \\
+
+&=\frac{1}{2 \sigma_q^2} \frac{(1 - \alpha_t)^2\overline{\alpha}_{t-1}}{(1 - \overline{\alpha}_t)^2} \left[ \| \hat{x}_\theta(x_t) - x_0 \|^2 \right]
+\end{align}
+$$
+
+Therefore, optimizing a DDPM comes down to training a neural network to predict the original ground truth image, from a empirically choosen noisen version of it. 
+
+Ignoring the constant, remember our ELBO, then it simplify to  :
+
+$$
+\begin{align} 
+ELBO_{\theta}(x)&=\mathbb{E_{q_{\phi}(x_{1}  |   x_0)} } \Big[\log \ p_{\theta}(x_0|x_1) \Big] - \sum_{t=2}^{T}\mathbb{E_{q_{\phi}(x_{t},x_{t-1}  |   x_0)} } \left[ \\ \mathbb{D_{KL}} \Big[ \   q_{\phi}(x_{t-1}|x_{t},x_0) || p_{\theta} (x_{t-1}|x_t) \Big] \right]   \\
+
+&=\mathbb{E_{q_{\phi}(x_{1}  |   x_0)} } \Big[\log \ p_{\theta}(x_0|x_1) \Big] -  \sum_{t=2}^{T}\mathbb{E_{q_{\phi}(x_{t},x_{t-1}  |   x_0)} } \left[                                     
+\frac{1}{2 \sigma_q^2} \frac{(1 - \alpha_t)^2\overline{\alpha}_{t-1}}{(1 - \overline{\alpha}_t)^2} \left[ \| \hat{x}_\theta(x_t) - x_0 \|^2 \right]
+
+\right]
+
+\end{align}
+$$
+
+
+We dropped the term in 
+$$ \mathbb{D_{KL}} \Big[ \   q_{\phi}(x_T|x_{0}) || p_{\theta} (x_{T}) \Big] $$
+because it remains as a constant, as there is nothing to train. 
 
 
 ## References 
