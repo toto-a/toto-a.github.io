@@ -588,7 +588,7 @@ where
 
 $$
 \\
-\mu_q(x_t, x_0) = \frac{(1 - \overline{\alpha}_{t-1})\sqrt{\overline{\alpha}_t}}{1 - \alpha_t}x_t 
+\mu_q(x_t, x_0) = \frac{(1 - \overline{\alpha}_{t-1})\sqrt{\overline{\alpha}_t}}{1 - \overline{\alpha}_t}x_t 
 + \frac{(1 - \alpha_t)\sqrt{\overline{\alpha}_{t-1}}}{1 - \overline{\alpha}_t}x_0
 $$
 
@@ -650,23 +650,20 @@ $$ \mu_\theta $$
 to be in form 
 
 $$
-\mu_\theta(x_t) = \frac{(1 - \overline{\alpha}_{t-1})\sqrt{\overline{\alpha}_t}}{1 - \alpha_t}x_t 
+\mu_\theta(x_t) = \frac{(1 - \overline{\alpha}_{t-1})\sqrt{\overline{\alpha}_t}}{1 - \overline{\alpha}_t}x_t 
 + \frac{(1 - \alpha_t)\sqrt{\overline{\alpha}_{t-1}}}{1 - \overline{\alpha}_t} \hat{x}_\theta(x_t)
 $$
 
 
 Then our simplified KL divergence, further simplify to  :
 $$
+\\
 \begin{align}
 \frac{1}{2 \sigma_q^2} \left[ \| \mu_\theta - \mu_q \|^2 \right]
-
-&=\frac{1}{2 \sigma_q^2} \left[
-   
+&=\frac{1}{2 \sigma_q^2} \left[   
 \left | \left| \frac{(1 - \alpha_t)\sqrt{\overline{\alpha}_{t-1}}}{1 - \overline{\alpha}_t} *(\hat{x}_\theta(x_t) - x_0 )
 \right| \right|^2
-
 \right] \\
-
 &=\frac{1}{2 \sigma_q^2} \frac{(1 - \alpha_t)^2\overline{\alpha}_{t-1}}{(1 - \overline{\alpha}_t)^2} \left[ \| \hat{x}_\theta(x_t) - x_0 \|^2 \right]
 \end{align}
 $$
@@ -676,10 +673,11 @@ Therefore, optimizing a DDPM comes down to training a neural network to predict 
 Ignoring the constant, remember our ELBO, then it simplify to  :
 
 $$
+\\
 \begin{align} 
 ELBO_{\theta}(x)&=\mathbb{E_{q_{\phi}(x_{1}  |   x_0)} } \Big[\log \ p_{\theta}(x_0|x_1) \Big] - \sum_{t=2}^{T}\mathbb{E_{q_{\phi}(x_{t},x_{t-1}  |   x_0)} } \left[ \\ \mathbb{D_{KL}} \Big[ \   q_{\phi}(x_{t-1}|x_{t},x_0) || p_{\theta} (x_{t-1}|x_t) \Big] \right]   \\
 
-&=\mathbb{E_{q_{\phi}(x_{1}  |   x_0)} } \Big[\log \ p_{\theta}(x_0|x_1) \Big] -  \sum_{t=2}^{T}\mathbb{E_{q_{\phi}(x_{t},x_{t-1}  |   x_0)} } \left[                                     
+&=\mathbb{E_{q_{\phi}(x_{1}  |   x_0)} } \Big[\log \ p_{\theta}(x_0|x_1) \Big] -  \sum_{t=2}^{T}\mathbb{E_{q_{\phi}(x_{t}|   x_0)} } \left[                                     
 \frac{1}{2 \sigma_q^2} \frac{(1 - \alpha_t)^2\overline{\alpha}_{t-1}}{(1 - \overline{\alpha}_t)^2} \left[ \| \hat{x}_\theta(x_t) - x_0 \|^2 \right]
 
 \right]
@@ -691,6 +689,73 @@ $$
 We dropped the term in 
 $$ \mathbb{D_{KL}} \Big[ \   q_{\phi}(x_T|x_{0}) || p_{\theta} (x_{T}) \Big] $$
 because it remains as a constant, as there is nothing to train. 
+
+Only the reconstruction term  :
+$$
+\\
+\begin{align}
+\log p(x_0|x_1) &=  \mathcal{N}(x_0|\mu_\theta(x_1), \sigma_q^2 \mathbb{I}) \propto -\frac{1}{2*\sigma_q^2} \left|
+\mu_\theta - \mu_q \right|^2 \\
+&= -\frac{1}{2\sigma_q^2} * \frac{(1 - \alpha_1)^2}{(1 - \alpha_1)^2} ||\hat{x}_\theta - x_0 ||^2  \; \text{Because} \; \alpha_0=1, \overline{\alpha_1}=\alpha_1 \\
+&=-\frac{1}{2\sigma_q^2}||\hat{x}_\theta - x_0 ||^2  
+\end{align}
+$$
+
+Then our ELBO becomes : 
+
+$$
+ELBO_{\theta}(x)= - \sum_{t=1}^{T}\mathbb{E_{q_{\phi}(x_{t} |   x_0)} }  \left[                                     
+\frac{1}{2 \sigma_q^2} \frac{(1 - \alpha_t)^2\overline{\alpha}_{t-1}}{(1 - \overline{\alpha}_t)^2} \left[ \| \hat{x}_\theta(x_t) - x_0 \|^2 \right]
+
+\right]
+
+$$
+
+
+Considering the above and using Monte-Carlo to approximate the expectation, we can write the optimization problem as  :
+
+$$
+\arg\max_\theta \sum_{x_0 \in \mathcal{X}} ELBO(x_t) \\
+= \arg\min_\theta \sum_{x_0 \in \mathcal{X}} \sum_{t=1}^{T}\mathbb{E_{q_{\phi}(x_{t} |   x_0)} }  \left[                                     
+\frac{1}{2 \sigma_q^2} \frac{(1 - \alpha_t)^2\overline{\alpha}_{t-1}}{(1 - \overline{\alpha}_t)^2} \left[ \| \hat{x}_\theta(x_t) - x_0 \|^2 \right]
+
+\right] \\
+
+=\arg\min_\theta \sum_{x_0 \in \mathcal{X}} \sum_{t=1}^{T} \frac{1}{M} \sum_{i=1}^{M}  \left[                                     
+\frac{1}{2 \sigma_q^2} \frac{(1 - \alpha_t)^2\overline{\alpha}_{t-1}}{(1 - \overline{\alpha}_t)^2} \left[ \| \hat{x}_\theta(x_t^{i}) - x_0 \|^2 \right]
+
+\right] \\
+
+$$
+
+where 
+
+$$
+x_t^{m} \sim \mathcal{N}(x_t|\sqrt{\overline{\alpha}_t}x_0,(1 - \overline{\alpha}_t)\mathbb{I})
+$$
+
+## Equivalent interpretation
+
+Previously, we proved that to train a diffusion model, we can simply train a neural network to predict the original image 
+$$
+x_0
+$$
+
+However, we can reparemetrize 
+$$x_0$$
+if we re-arrange the equation below :
+
+$$
+x_t = \sqrt{\overline{\alpha}_t} x_0 + \sqrt{1 - \overline{\alpha}_t} \epsilon_0
+\quad \Rightarrow \quad x_0 = \frac{x_t - \sqrt{1 - \overline{\alpha}_t} \epsilon_0}{\sqrt{\overline{\alpha}_t}}
+$$
+
+The injecting it into the true denoising mean 
+$$ \mu_q(x_t,x_0) $$ 
+
+
+
+
 
 
 ## References 
